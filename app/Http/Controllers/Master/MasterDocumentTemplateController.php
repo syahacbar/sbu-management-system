@@ -86,6 +86,11 @@ class MasterDocumentTemplateController extends Controller
         ]);
     }
 
+    public function show(DocumentTemplate $documentTemplate): RedirectResponse
+    {
+        return redirect()->route('master.document-templates.edit', $documentTemplate);
+    }
+
     public function update(Request $request, DocumentTemplate $documentTemplate): RedirectResponse
     {
         $validated = $request->validate([

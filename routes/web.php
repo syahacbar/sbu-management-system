@@ -17,6 +17,13 @@ use App\Http\Controllers\Workspace\ArchiveController;
 use App\Http\Controllers\Workspace\GenerateController;
 use App\Http\Controllers\Workspace\WorkspaceDashboardController;
 use App\Http\Controllers\Workspace\WorkspaceResourceController;
+use App\Http\Controllers\Workspace\CompanyPersonController;
+use App\Http\Controllers\Workspace\ApplicationExpertController;
+use App\Http\Controllers\Workspace\CompanyEquipmentController;
+use App\Http\Controllers\Workspace\FinancialStatementController;
+use App\Http\Controllers\Workspace\CompanyDocumentController;
+use App\Http\Controllers\Workspace\CompanyArchiveController;
+use App\Http\Controllers\Workspace\GenerateDocumentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -32,6 +39,11 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+
+    Route::get('/arsip', [CompanyArchiveController::class, 'globalIndex'])->name('archives.global');
+    Route::get('/arsip-dokumen/{archive}/view', [CompanyArchiveController::class, 'view'])->name('archives.view');
+    Route::get('/arsip-dokumen/{archive}/download', [CompanyArchiveController::class, 'download'])->name('archives.download');
+    Route::get('/arsip-dokumen/{archive}/print', [CompanyArchiveController::class, 'print'])->name('archives.print');
 
     Route::prefix('master')->name('master.')->group(function (): void {
         Route::get('kbli/download-template', [MasterKbliController::class, 'downloadTemplate'])->name('kbli.download-template');
@@ -63,6 +75,18 @@ Route::middleware('auth')->group(function (): void {
             ->names('schemes');
 
         $masterRoutes = function (string $uri, string $name): void {
+            if (in_array($name, ['science-fields', 'bg-equipment', 'bs-equipment'])) {
+                Route::get($uri.'/download-template', [MasterResourceController::class, 'downloadTemplate'])
+                    ->defaults('master_resource', $name)
+                    ->name($name.'.download-template');
+                Route::get($uri.'/import', [MasterResourceController::class, 'importForm'])
+                    ->defaults('master_resource', $name)
+                    ->name($name.'.import-form');
+                Route::post($uri.'/import', [MasterResourceController::class, 'import'])
+                    ->defaults('master_resource', $name)
+                    ->name($name.'.import');
+            }
+
             Route::get($uri, [MasterResourceController::class, 'index'])
                 ->defaults('master_resource', $name)
                 ->name($name.'.index');
@@ -128,32 +152,71 @@ Route::middleware('auth')->group(function (): void {
                     ->name($name.'.destroy');
             };
 
-            $workspaceRoutes('direktur', 'directors');
-            $workspaceRoutes('pjbu', 'pjbus');
+            Route::get('direktur/create', [CompanyPersonController::class, 'create'])->defaults('type', 'direktur')->name('directors.create');
+            Route::post('direktur', [CompanyPersonController::class, 'store'])->defaults('type', 'direktur')->name('directors.store');
+            Route::get('direktur/{person}/edit', [CompanyPersonController::class, 'edit'])->name('directors.edit');
+            Route::put('direktur/{person}', [CompanyPersonController::class, 'update'])->name('directors.update');
+            Route::delete('direktur/{person}', [CompanyPersonController::class, 'destroy'])->name('directors.destroy');
+
+            Route::get('pjbu/create', [CompanyPersonController::class, 'create'])->defaults('type', 'pjbu')->name('pjbus.create');
+            Route::post('pjbu', [CompanyPersonController::class, 'store'])->defaults('type', 'pjbu')->name('pjbus.store');
+            Route::get('pjbu/{person}/edit', [CompanyPersonController::class, 'edit'])->name('pjbus.edit');
+            Route::put('pjbu/{person}', [CompanyPersonController::class, 'update'])->name('pjbus.update');
+            Route::delete('pjbu/{person}', [CompanyPersonController::class, 'destroy'])->name('pjbus.destroy');
+
+            Route::get('direktur-pjbu', [WorkspaceResourceController::class, 'directorsPjbu'])->name('directors_pjbus');
+            Route::get('direktur', [WorkspaceResourceController::class, 'directorsPjbu'])->name('directors.index');
 
             Route::resource('pengajuan', ApplicationController::class)
                 ->parameters(['pengajuan' => 'application'])
                 ->names('applications');
 
+            Route::post('pengajuan/{application}/activate', [ApplicationController::class, 'activate'])->name('applications.activate');
+            Route::post('pengajuan/{application}/update-status', [ApplicationController::class, 'updateStatus'])->name('applications.update_status');
+            Route::get('pengajuan/{application}/smap/preview', [ApplicationController::class, 'previewSmap'])->name('applications.smap.preview');
+            Route::get('pengajuan/{application}/smap/download', [ApplicationController::class, 'downloadSmap'])->name('applications.smap.download');
+            Route::get('pengajuan/{application}/sptjm/preview', [ApplicationController::class, 'previewSptjm'])->name('applications.sptjm.preview');
+            Route::get('pengajuan/{application}/sptjm/download', [ApplicationController::class, 'downloadSptjm'])->name('applications.sptjm.download');
+            Route::get('pengajuan/{application}/lampiran-tenaga-ahli/preview', [ApplicationController::class, 'previewTenagaAhli'])->name('applications.experts_annex.preview');
+            Route::get('pengajuan/{application}/lampiran-tenaga-ahli/download', [ApplicationController::class, 'downloadTenagaAhli'])->name('applications.experts_annex.download');
+            Route::get('pengajuan/{application}/neraca/preview', [ApplicationController::class, 'previewNeraca'])->name('applications.balance.preview');
+            Route::get('pengajuan/{application}/neraca/download', [ApplicationController::class, 'downloadNeraca'])->name('applications.balance.download');
+            Route::get('pengajuan/{application}/surat-alat-bg/preview', [ApplicationController::class, 'previewAlatBg'])->name('applications.equip_bg.preview');
+            Route::get('pengajuan/{application}/surat-alat-bg/download', [ApplicationController::class, 'downloadAlatBg'])->name('applications.equip_bg.download');
+            Route::get('pengajuan/{application}/surat-alat-bs/preview', [ApplicationController::class, 'previewAlatBs'])->name('applications.equip_bs.preview');
+            Route::get('pengajuan/{application}/surat-alat-bs/download', [ApplicationController::class, 'downloadAlatBs'])->name('applications.equip_bs.download');
+
             Route::post('pengajuan/{application}/documents', [ApplicationDocumentController::class, 'upload'])->name('applications.documents.upload');
             Route::delete('pengajuan/{application}/documents/{document}', [ApplicationDocumentController::class, 'destroy'])->name('applications.documents.destroy');
             Route::get('pengajuan/{application}/documents/{document}/download', [ApplicationDocumentController::class, 'download'])->name('applications.documents.download');
 
-            $workspaceRoutes('pjtbu', 'pjtbus');
-            $workspaceRoutes('pjskbu', 'pjskbus');
-            $workspaceRoutes('tenaga-ahli', 'experts');
-            $workspaceRoutes('peralatan', 'equipment');
-            $workspaceRoutes('neraca', 'balance');
-            $workspaceRoutes('dokumen', 'documents');
+            Route::resource('tenaga-ahli', ApplicationExpertController::class)
+                ->parameters(['tenaga-ahli' => 'expert'])
+                ->names('experts');
+            Route::resource('peralatan', CompanyEquipmentController::class)
+                ->parameters(['peralatan' => 'equipment'])
+                ->names('equipment');
+            Route::resource('neraca', FinancialStatementController::class)
+                ->parameters(['neraca' => 'statement'])
+                ->names('balance');
+            Route::resource('dokumen', CompanyDocumentController::class)
+                ->parameters(['dokumen' => 'document'])
+                ->names('documents');
+            Route::get('dokumen/{document}/download', [CompanyDocumentController::class, 'download'])
+                ->name('documents.download');
 
-            Route::resource('arsip', ArchiveController::class)
-                ->only(['index', 'show', 'destroy'])
+            Route::resource('arsip', CompanyArchiveController::class)
+                ->only(['index', 'destroy'])
                 ->parameters(['arsip' => 'archive'])
                 ->names('archives');
 
             Route::get('generate', [GenerateController::class, 'index'])->name('generate.index');
             Route::get('generate/preview', [GenerateController::class, 'preview'])->name('generate.preview');
+            Route::post('generate/documents', [GenerateController::class, 'processDocuments'])->name('generate.documents.process');
+            Route::get('generate/documents/{application}/{document}/preview', [GenerateController::class, 'previewDocument'])->name('generate.documents.preview');
             Route::post('generate/archive', [GenerateController::class, 'saveArchive'])->name('generate.save-archive');
+            Route::get('generate/pdf/{application}/{template}/preview', [GenerateDocumentController::class, 'preview'])->name('generate.pdf.preview');
+            Route::get('generate/pdf/{application}/{template}/download', [GenerateDocumentController::class, 'download'])->name('generate.pdf.download');
         });
 
     Route::get('/pengaturan', [AdminPageController::class, '__invoke'])

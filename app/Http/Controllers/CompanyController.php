@@ -79,13 +79,20 @@ class CompanyController extends Controller
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'nib' => ['nullable', 'string', 'max:100'],
             'npwp' => ['nullable', 'string', 'max:100'],
+            'nib' => ['nullable', 'string', 'max:100'],
             'email' => ['nullable', 'email', 'max:255'],
             'phone' => ['nullable', 'string', 'max:100'],
-            'address' => ['nullable', 'string'],
-            'is_active' => ['required', 'boolean'],
-            'description' => ['nullable', 'string'],
+            'business_type' => ['nullable', 'string', 'max:100'],
+            'qualification' => ['nullable', 'string', 'max:100'],
+            'province' => ['nullable', 'string', 'max:255'],
+            'city' => ['nullable', 'string', 'max:255'],
+            'district' => ['nullable', 'string', 'max:255'],
+            'village' => ['nullable', 'string', 'max:255'],
+            'rt_rw' => ['nullable', 'string', 'max:100'],
+            'street' => ['nullable', 'string', 'max:255'],
+            'signing_place' => ['nullable', 'string', 'max:255'],
+            'notes' => ['nullable', 'string'],
         ]);
     }
 }

@@ -40,7 +40,6 @@
                             <th class="px-5 py-3">Perusahaan</th>
                             <th class="px-5 py-3">NIB</th>
                             <th class="px-5 py-3">NPWP</th>
-                            <th class="px-5 py-3">Status</th>
                             <th class="px-5 py-3 text-right">Aksi</th>
                         </tr>
                     </thead>
@@ -54,14 +53,9 @@
                                 <td class="px-5 py-4 text-slate-600">{{ $company->nib ?: '-' }}</td>
                                 <td class="px-5 py-4 text-slate-600">{{ $company->npwp ?: '-' }}</td>
                                 <td class="px-5 py-4">
-                                    <span class="rounded-full px-2.5 py-1 text-xs font-semibold {{ $company->is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500' }}">
-                                        {{ $company->is_active ? 'Aktif' : 'Nonaktif' }}
-                                    </span>
-                                </td>
-                                <td class="px-5 py-4">
                                     <div class="flex justify-end gap-2">
                                         <a href="{{ route('companies.workspace.dashboard', $company) }}" class="rounded-md bg-slate-900 px-3 py-1.5 text-sm font-semibold text-white transition hover:bg-slate-700">
-                                            Workspace
+                                            Buka Workspace
                                         </a>
                                         <a href="{{ route('companies.edit', $company) }}" class="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100">
                                             Edit

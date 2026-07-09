@@ -58,8 +58,12 @@ class WorkspaceResourceController extends Controller
         $relation = $resource['relation'];
         $company->{$relation}()->create($this->validated($request));
 
+        $redirectRoute = in_array($resource['key'], ['directors', 'pjbus']) 
+            ? 'companies.workspace.directors_pjbus' 
+            : $resource['route'].'.index';
+
         return redirect()
-            ->route($resource['route'].'.index', $company)
+            ->route($redirectRoute, $company)
             ->with('status', "{$resource['title']} berhasil ditambahkan.");
     }
 
@@ -80,8 +84,12 @@ class WorkspaceResourceController extends Controller
         $model = $this->findItem($company, $resource, $item);
         $model->update($this->validated($request));
 
+        $redirectRoute = in_array($resource['key'], ['directors', 'pjbus']) 
+            ? 'companies.workspace.directors_pjbus' 
+            : $resource['route'].'.index';
+
         return redirect()
-            ->route($resource['route'].'.index', $company)
+            ->route($redirectRoute, $company)
             ->with('status', "{$resource['title']} berhasil diperbarui.");
     }
 
@@ -90,9 +98,21 @@ class WorkspaceResourceController extends Controller
         $resource = $this->resource($request);
         $this->findItem($company, $resource, $item)->delete();
 
+        $redirectRoute = in_array($resource['key'], ['directors', 'pjbus']) 
+            ? 'companies.workspace.directors_pjbus' 
+            : $resource['route'].'.index';
+
         return redirect()
-            ->route($resource['route'].'.index', $company)
+            ->route($redirectRoute, $company)
             ->with('status', "{$resource['title']} berhasil dihapus.");
+    }
+
+    public function directorsPjbu(Request $request, Company $company): View
+    {
+        $directors = $company->directors()->orderByDesc('is_main')->orderBy('name')->get();
+        $pjbus = $company->pjbus()->orderByDesc('is_main')->orderBy('name')->get();
+
+        return view('workspace.directors_pjbu', compact('company', 'directors', 'pjbus'));
     }
 
     /**

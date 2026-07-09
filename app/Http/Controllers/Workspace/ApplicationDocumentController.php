@@ -25,6 +25,10 @@ class ApplicationDocumentController extends Controller
 
     public function upload(Request $request, Company $company, Application $application): RedirectResponse
     {
+        if ((int) $application->company_id !== (int) $company->id) {
+            abort(403, 'Akses ditolak.');
+        }
+
         $request->validate([
             'requirement_name' => ['required', 'string'],
             'file' => ['required', 'file', 'mimes:pdf,png,jpg,jpeg', 'max:5120'], // Max 5MB
@@ -40,8 +44,7 @@ class ApplicationDocumentController extends Controller
             $file = $request->file('file');
             $originalName = $file->getClientOriginalName();
 
-            // Store file under storage/app/public/application_documents/
-            $path = $file->store('application_documents', 'public');
+            $path = $file->store("application-documents/{$company->id}", 'public');
 
             // Find existing document for this requirement
             $existing = $application->documents()->where('requirement_name', $reqName)->first();
@@ -58,9 +61,11 @@ class ApplicationDocumentController extends Controller
             } else {
                 // Create new record
                 $application->documents()->create([
+                    'company_id' => $company->id,
                     'requirement_name' => $reqName,
                     'file_path' => $path,
                     'file_name' => $originalName,
+                    'status' => 'ada',
                 ]);
             }
 
@@ -73,8 +78,7 @@ class ApplicationDocumentController extends Controller
 
     public function destroy(Company $company, Application $application, ApplicationDocument $document): RedirectResponse
     {
-        // Double check ownership
-        if ((int) $document->company_application_id !== (int) $application->id) {
+        if ((int) $application->company_id !== (int) $company->id || (int) $document->company_id !== (int) $company->id || (int) $document->company_application_id !== (int) $application->id) {
             abort(403, 'Akses ditolak.');
         }
 
@@ -93,7 +97,7 @@ class ApplicationDocumentController extends Controller
 
     public function download(Company $company, Application $application, ApplicationDocument $document): StreamedResponse
     {
-        if ((int) $document->company_application_id !== (int) $application->id) {
+        if ((int) $application->company_id !== (int) $company->id || (int) $document->company_id !== (int) $company->id || (int) $document->company_application_id !== (int) $application->id) {
             abort(403, 'Akses ditolak.');
         }
 

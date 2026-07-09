@@ -15,6 +15,10 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
+use App\Helpers\SimpleXlsxReader;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Exception;
 
 class MasterResourceController extends Controller
 {
@@ -86,6 +90,201 @@ class MasterResourceController extends Controller
         return redirect()
             ->route($resource['route'].'.index')
             ->with('status', "{$resource['title']} berhasil dihapus.");
+    }
+
+    public function downloadTemplate(Request $request)
+    {
+        $resource = $this->resource($request);
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="template_' . str_replace('-', '_', $resource['key']) . '.csv"',
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0'
+        ];
+
+        $columns = [
+            'Kode ' . $resource['title'],
+            'Nama ' . $resource['title'],
+            'Status (Aktif/Nonaktif)',
+            'Urutan',
+            'Keterangan'
+        ];
+
+        $examples = match ($resource['key']) {
+            'science-fields' => [
+                ['SIPIL', 'Teknik Sipil', 'Aktif', '10', 'Rumpun keilmuan teknik sipil'],
+                ['ARS', 'Arsitektur', 'Aktif', '20', 'Rumpun keilmuan arsitektur']
+            ],
+            'bg-equipment' => [
+                ['BG-ALAT-01', 'Concrete Mixer', 'Aktif', '10', 'Alat pengaduk semen'],
+                ['BG-ALAT-02', 'Scaffolding', 'Aktif', '20', 'Perancah bangunan']
+            ],
+            'bs-equipment' => [
+                ['BS-ALAT-01', 'Excavator', 'Aktif', '10', 'Alat berat pengeruk'],
+                ['BS-ALAT-02', 'Vibro Roller', 'Aktif', '20', 'Alat pemadat tanah']
+            ],
+            default => [
+                ['KODE01', 'Contoh Nama 1', 'Aktif', '10', 'Contoh Keterangan 1'],
+                ['KODE02', 'Contoh Nama 2', 'Aktif', '20', 'Contoh Keterangan 2']
+            ]
+        };
+
+        $callback = function () use ($columns, $examples) {
+            $file = fopen('php://output', 'w');
+            fprintf($file, chr(0xEF).chr(0xBB).chr(0xBF));
+            fputcsv($file, $columns, ';');
+            foreach ($examples as $row) {
+                fputcsv($file, $row, ';');
+            }
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function importForm(Request $request): View
+    {
+        $resource = $this->resource($request);
+        return view('master.import', compact('resource'));
+    }
+
+    public function import(Request $request): RedirectResponse
+    {
+        $resource = $this->resource($request);
+
+        $request->validate([
+            'file' => ['required', 'file', 'max:5120'], // Max 5MB
+        ]);
+
+        $file = $request->file('file');
+        $path = $file->getRealPath();
+        $extension = strtolower($file->getClientOriginalExtension());
+
+        if (!in_array($extension, ['xlsx', 'csv'])) {
+            return redirect()->back()->withErrors(['file' => 'Hanya file dengan ekstensi .xlsx atau .csv yang diperbolehkan.']);
+        }
+
+        $rows = [];
+        try {
+            if ($extension === 'xlsx') {
+                $rows = SimpleXlsxReader::read($path);
+            } else {
+                if (($handle = fopen($path, 'r')) !== false) {
+                    $bom = fread($handle, 3);
+                    if ($bom !== "\xEF\xBB\xBF") {
+                        rewind($handle);
+                    }
+                    while (($data = fgetcsv($handle, 0, ';')) !== false) {
+                        if (count($data) === 1 && strpos($data[0], ',') !== false) {
+                            $data = str_getcsv($data[0], ',');
+                        }
+                        $rows[] = $data;
+                    }
+                    fclose($handle);
+                }
+            }
+        } catch (Exception $e) {
+            Log::error('Error parsing file for ' . $resource['key'] . ': ' . $e->getMessage());
+            return redirect()->back()->withErrors(['file' => 'Gagal membaca isi berkas: ' . $e->getMessage()]);
+        }
+
+        if (count($rows) <= 1) {
+            return redirect()->back()->withErrors(['file' => 'Berkas kosong atau hanya berisi baris header.']);
+        }
+
+        // Remove header row
+        $header = array_shift($rows);
+
+        $errors = [];
+        $records = [];
+        $existingCodes = [];
+
+        foreach ($rows as $index => $row) {
+            $rowNum = $index + 2;
+
+            $nonEmptyCells = array_filter($row, fn($val) => trim((string)$val) !== '');
+            if (empty($nonEmptyCells)) {
+                continue;
+            }
+
+            $code = trim((string)($row[0] ?? ''));
+            $name = trim((string)($row[1] ?? ''));
+            $statusStr = trim((string)($row[2] ?? ''));
+            $sortOrderStr = trim((string)($row[3] ?? ''));
+            $description = trim((string)($row[4] ?? ''));
+
+            if ($code === '') {
+                $errors[] = "Baris {$rowNum}: Kolom Kode wajib diisi.";
+            }
+
+            if ($name === '') {
+                $errors[] = "Baris {$rowNum}: Kolom Nama wajib diisi.";
+            }
+
+            if (in_array($code, $existingCodes)) {
+                $errors[] = "Baris {$rowNum}: Kode '{$code}' terduplikasi dalam file.";
+            } else {
+                $existingCodes[] = $code;
+            }
+
+            $is_active = true;
+            if (strtolower($statusStr) === 'nonaktif' || strtolower($statusStr) === 'tidak' || $statusStr === '0' || strtolower($statusStr) === 'inactive') {
+                $is_active = false;
+            }
+
+            $sort_order = 0;
+            if ($sortOrderStr !== '') {
+                if (!is_numeric($sortOrderStr)) {
+                    $errors[] = "Baris {$rowNum}: Urutan harus berupa angka.";
+                } else {
+                    $sort_order = (int)$sortOrderStr;
+                }
+            }
+
+            $records[] = [
+                'code' => $code,
+                'name' => $name,
+                'is_active' => $is_active,
+                'sort_order' => $sort_order,
+                'description' => $description ?: null,
+            ];
+        }
+
+        if (!empty($errors)) {
+            return redirect()->back()
+                ->withInput()
+                ->with('import_errors', $errors);
+        }
+
+        DB::beginTransaction();
+        try {
+            $inserted = 0;
+            $updated = 0;
+
+            foreach ($records as $record) {
+                $existing = $resource['model']::where('code', $record['code'])->first();
+                if ($existing) {
+                    $existing->update($record);
+                    $updated++;
+                } else {
+                    $resource['model']::create($record);
+                    $inserted++;
+                }
+            }
+
+            DB::commit();
+
+            return redirect()
+                ->route($resource['route'].'.index')
+                ->with('status', "Impor berhasil! {$inserted} data {$resource['title']} baru ditambahkan dan {$updated} data diperbarui.");
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error($resource['key'] . ' import save error: ' . $e->getMessage());
+            return redirect()->back()
+                ->withInput()
+                ->withErrors(['file' => 'Gagal menyimpan data ke database: ' . $e->getMessage()]);
+        }
     }
 
     /**

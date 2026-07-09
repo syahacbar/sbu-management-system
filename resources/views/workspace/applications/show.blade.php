@@ -9,6 +9,15 @@
             </a>
 
             <div class="flex gap-2">
+                @if (!$application->is_active)
+                    <form method="POST" action="{{ route('companies.workspace.applications.activate', [$company, $application]) }}">
+                        @csrf
+                        <button type="submit" class="rounded-md bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-slate-800">
+                            Jadikan Pengajuan Aktif
+                        </button>
+                    </form>
+                @endif
+
                 <a href="{{ route('companies.workspace.applications.edit', [$company, $application]) }}" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
                     Edit Pengajuan
                 </a>
@@ -28,22 +37,30 @@
                 <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
                     <div class="border-b border-slate-200 p-5 flex items-center justify-between">
                         <div>
-                            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Kode Pengajuan: {{ $application->code ?: '-' }}</span>
-                            <h3 class="mt-1 text-xl font-bold text-slate-950">{{ $application->name }}</h3>
+                            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Nomor Pengajuan: {{ $application->application_number }}</span>
+                            <h3 class="mt-1 text-xl font-bold text-slate-950">
+                                SBU {{ $application->scheme?->scheme_name ?: 'Sertifikasi Badan Usaha' }}
+                            </h3>
                         </div>
                         @php
                             $badgeClasses = match($application->status) {
                                 'draft' => 'bg-slate-100 text-slate-700 border-slate-200',
-                                'review' => 'bg-amber-50 text-amber-700 border-amber-200',
-                                'approved' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
-                                'rejected' => 'bg-rose-50 text-rose-700 border-rose-200',
+                                'berkas_belum_lengkap' => 'bg-rose-50 text-rose-700 border-rose-200',
+                                'berkas_lengkap' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                                'proses' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
+                                'revisi' => 'bg-amber-50 text-amber-700 border-amber-200',
+                                'terbit' => 'bg-teal-50 text-teal-700 border-teal-200',
+                                'selesai' => 'bg-sky-50 text-sky-700 border-sky-200',
                                 default => 'bg-slate-100 text-slate-700'
                             };
                             $statusLabel = match($application->status) {
-                                'draft' => 'Draft / Konsep',
-                                'review' => 'Dalam Review',
-                                'approved' => 'Disetujui',
-                                'rejected' => 'Ditolak',
+                                'draft' => 'Draft',
+                                'berkas_belum_lengkap' => 'Berkas Belum Lengkap',
+                                'berkas_lengkap' => 'Berkas Lengkap',
+                                'proses' => 'Proses',
+                                'revisi' => 'Revisi',
+                                'terbit' => 'Terbit',
+                                'selesai' => 'Selesai',
                                 default => ucfirst($application->status)
                             };
                         @endphp
@@ -53,36 +70,49 @@
                     </div>
 
                     <div class="p-5 space-y-6">
-                        <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="grid gap-4 sm:grid-cols-3">
                             <div>
-                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tanggal Pengajuan</span>
-                                <p class="mt-1 text-sm font-bold text-slate-800">{{ $application->record_date?->format('d F Y') ?: '-' }}</p>
+                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tipe Pengajuan</span>
+                                <p class="mt-1 text-sm font-bold text-slate-800 uppercase">{{ $application->application_type }}</p>
                             </div>
                             <div>
-                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Nominal Biaya</span>
-                                <p class="mt-1 text-sm font-bold text-slate-800">
-                                    {{ $application->amount !== null ? 'Rp '.number_format((float) $application->amount, 0, ',', '.') : '-' }}
-                                </p>
+                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tahun Pengajuan</span>
+                                <p class="mt-1 text-sm font-bold text-slate-800">{{ $application->application_year }}</p>
+                            </div>
+                            <div>
+                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Tanggal Pengajuan</span>
+                                <p class="mt-1 text-sm font-bold text-slate-800">{{ $application->submission_date?->format('d F Y') ?: '-' }}</p>
                             </div>
                         </div>
 
-                        <div class="grid gap-4 sm:grid-cols-2">
+                        <div class="grid gap-4 sm:grid-cols-3">
                             <div>
-                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Urutan Tampilan</span>
-                                <p class="mt-1 text-sm font-bold text-slate-800">{{ $application->sort_order }}</p>
+                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Kualifikasi</span>
+                                <p class="mt-1 text-sm font-bold text-slate-800">{{ $application->qualification ?: '-' }}</p>
                             </div>
                             <div>
-                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Status Rekam</span>
-                                <p class="mt-1 text-sm font-bold {{ $application->is_active ? 'text-emerald-600' : 'text-slate-500' }}">
-                                    {{ $application->is_active ? 'Aktif' : 'Nonaktif' }}
+                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Nama LSBU</span>
+                                <p class="mt-1 text-sm font-bold text-slate-800">{{ $application->lsbu_name ?: '-' }}</p>
+                            </div>
+                            <div>
+                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Asosiasi</span>
+                                <p class="mt-1 text-sm font-bold text-slate-800">{{ $application->association_name ?: '-' }}</p>
+                            </div>
+                        </div>
+
+                        <div class="grid gap-4 sm:grid-cols-2 border-t border-slate-50 pt-4">
+                            <div>
+                                <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Status Keaktifan</span>
+                                <p class="mt-1 text-sm font-bold {{ $application->is_active ? 'text-emerald-600' : 'text-slate-400' }}">
+                                    {{ $application->is_active ? 'Pengajuan Aktif (Default Cetak)' : 'Pengajuan Tidak Aktif' }}
                                 </p>
                             </div>
                         </div>
 
                         <div class="border-t border-slate-100 pt-5">
-                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Keterangan / Catatan</span>
+                            <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Catatan Pengajuan</span>
                             <p class="mt-2 text-sm text-slate-700 bg-slate-50 rounded-md p-3 whitespace-pre-line border border-slate-100">
-                                {{ $application->description ?: 'Tidak ada keterangan tambahan.' }}
+                                {{ $application->notes ?: 'Tidak ada catatan tambahan.' }}
                             </p>
                         </div>
                     </div>
@@ -172,6 +202,174 @@
 
             <!-- Domain SBU Sidebar Relation Details -->
             <aside class="space-y-6">
+                <!-- SMAP Actions -->
+                <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+                    <h4 class="font-bold text-slate-900 border-b border-slate-100 pb-3">Dokumen SMAP</h4>
+
+                    @php
+                        $pjbu = $company->pjbus()->where('is_main', true)->first() ?: $company->pjbus()->first();
+                    @endphp
+
+                    @if (!$pjbu)
+                        <div class="rounded-md border border-amber-200 bg-amber-50 p-3.5 text-xs text-amber-800 space-y-2">
+                            <p class="font-bold">Peringatan</p>
+                            <p class="leading-relaxed">Belum ada data Penanggung Jawab Badan Usaha (PJBU) terdaftar. Anda wajib menambahkan data PJBU terlebih dahulu sebelum dapat membuat dokumen SMAP.</p>
+                            <a href="{{ route('companies.workspace.directors_pjbus', $company) }}" class="inline-block font-bold text-amber-900 underline hover:text-amber-950">
+                                Kelola PJBU & Direktur &rarr;
+                            </a>
+                        </div>
+                    @else
+                        <div class="text-xs text-slate-500 leading-relaxed bg-slate-50 border border-slate-100 rounded-md p-3">
+                            <p class="font-bold text-slate-700">PJBU Utama Penandatangan:</p>
+                            <p class="mt-1 font-semibold text-emerald-800">{{ $pjbu->name }} ({{ $pjbu->position ?: 'PJBU' }})</p>
+                        </div>
+
+                        <div class="grid gap-2">
+                            <a href="{{ route('companies.workspace.applications.smap.preview', [$company, $application]) }}" target="_blank" class="inline-flex w-full items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
+                                Preview SMAP
+                            </a>
+                            <a href="{{ route('companies.workspace.applications.smap.download', [$company, $application]) }}" class="inline-flex w-full items-center justify-center rounded-md bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-rose-700">
+                                Download SMAP (PDF)
+                            </a>
+                        </div>
+                    @endif
+                </section>
+
+                <!-- SPTJM & PDF Actions -->
+                <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+                    <h4 class="font-bold text-slate-900 border-b border-slate-100 pb-3">Dokumen SPTJM Resmi</h4>
+                    
+                    @php
+                        $pjbu = $company->pjbus()->where('is_main', true)->first() ?: $company->pjbus()->first();
+                    @endphp
+
+                    @if (!$pjbu)
+                        <div class="rounded-md border border-amber-200 bg-amber-50 p-3.5 text-xs text-amber-800 space-y-2">
+                            <p class="font-bold">⚠️ Warning / Peringatan</p>
+                            <p class="leading-relaxed">Belum ada data Penanggung Jawab Badan Usaha (PJBU) terdaftar. Anda wajib menambahkan data PJBU terlebih dahulu sebelum dapat membuat dokumen SPTJM.</p>
+                            <a href="{{ route('companies.workspace.directors_pjbus', $company) }}" class="inline-block font-bold text-amber-900 underline hover:text-amber-950">
+                                Kelola PJBU & Direktur &rarr;
+                            </a>
+                        </div>
+                    @else
+                        <div class="text-xs text-slate-500 leading-relaxed bg-slate-50 border border-slate-100 rounded-md p-3">
+                            <p class="font-bold text-slate-700">PJBU Utama Penandatangan:</p>
+                            <p class="mt-1 font-semibold text-emerald-800">{{ $pjbu->name }} ({{ $pjbu->position ?: 'PJBU' }})</p>
+                        </div>
+
+                        <div class="grid gap-2">
+                            <a href="{{ route('companies.workspace.applications.sptjm.preview', [$company, $application]) }}" target="_blank" class="inline-flex w-full items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
+                                Preview SPTJM
+                            </a>
+                            <a href="{{ route('companies.workspace.applications.sptjm.download', [$company, $application]) }}" class="inline-flex w-full items-center justify-center rounded-md bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-rose-700">
+                                Download SPTJM (PDF)
+                            </a>
+                        </div>
+                    @endif
+                </section>
+
+                <!-- Lampiran Tenaga Ahli Actions -->
+                <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+                    <h4 class="font-bold text-slate-900 border-b border-slate-100 pb-3">Lampiran Tenaga Ahli</h4>
+
+                    @php
+                        $pjtbuCount = $application->experts()->where('expert_type', 'pjtbu')->count();
+                        $pjskbuCount = $application->experts()->where('expert_type', 'pjskbu')->count();
+                        $expertsComplete = $pjtbuCount > 0 && $pjskbuCount > 0;
+                    @endphp
+
+                    @if (!$expertsComplete)
+                        <div class="rounded-md border border-amber-200 bg-amber-50 p-3.5 text-xs text-amber-800 space-y-2">
+                            <p class="font-bold">⚠️ Warning / Peringatan</p>
+                            <p class="leading-relaxed">Data PJTBU atau PJSKBU belum lengkap (PJTBU: {{ $pjtbuCount }}, PJSKBU: {{ $pjskbuCount }}). Anda direkomendasikan untuk melengkapi data Tenaga Ahli terlebih dahulu sebelum generate lampiran resmi.</p>
+                            <a href="{{ route('companies.workspace.experts.index', $company) }}" class="inline-block font-bold text-amber-900 underline hover:text-amber-950">
+                                Kelola Tenaga Ahli &rarr;
+                            </a>
+                        </div>
+                    @else
+                        <div class="text-xs text-slate-500 leading-relaxed bg-slate-50 border border-slate-100 rounded-md p-3">
+                            <p class="font-bold text-slate-700">Status Persyaratan TA:</p>
+                            <p class="mt-1 font-semibold text-emerald-800">✓ Lengkap (PJTBU & PJSKBU tersedia)</p>
+                        </div>
+                    @endif
+
+                    <div class="grid gap-2">
+                        <a href="{{ route('companies.workspace.applications.experts_annex.preview', [$company, $application]) }}" target="_blank" class="inline-flex w-full items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50">
+                            Preview Lampiran TA
+                        </a>
+                        <a href="{{ route('companies.workspace.applications.experts_annex.download', [$company, $application]) }}" class="inline-flex w-full items-center justify-center rounded-md bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-rose-700">
+                            Download Lampiran (PDF)
+                        </a>
+                    </div>
+                </section>
+
+                <!-- Laporan Neraca Actions -->
+                <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+                    <h4 class="font-bold text-slate-900 border-b border-slate-100 pb-3">Laporan Neraca Resmi</h4>
+
+                    @php
+                        $hasBalance = $company->balanceEntries()->where('sbu_application_id', $application->id)->exists();
+                    @endphp
+
+                    @if (!$hasBalance)
+                        <div class="rounded-md border border-amber-200 bg-amber-50 p-3.5 text-xs text-amber-800 space-y-2">
+                            <p class="font-bold">⚠️ Warning / Peringatan</p>
+                            <p class="leading-relaxed">Laporan neraca keuangan belum diinput untuk pengajuan SBU ini. Anda wajib menginput neraca terlebih dahulu sebelum dapat mencetak dokumen neraca resmi.</p>
+                            <a href="{{ route('companies.workspace.balance.index', $company) }}" class="inline-block font-bold text-amber-900 underline hover:text-amber-950">
+                                Input Neraca Keuangan &rarr;
+                            </a>
+                        </div>
+                    @else
+                        <div class="text-xs text-slate-500 leading-relaxed bg-slate-50 border border-slate-100 rounded-md p-3">
+                            <p class="font-bold text-slate-700">Status Laporan Neraca:</p>
+                            <p class="mt-1 font-semibold text-emerald-800">✓ Tersedia (Siap Cetak Landscape)</p>
+                        </div>
+                    @endif
+
+                    <div class="grid gap-2">
+                        <a href="{{ route('companies.workspace.applications.balance.preview', [$company, $application]) }}" target="_blank" class="inline-flex w-full items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 @if(!$hasBalance) opacity-50 pointer-events-none @endif">
+                            Preview Neraca
+                        </a>
+                        <a href="{{ route('companies.workspace.applications.balance.download', [$company, $application]) }}" class="inline-flex w-full items-center justify-center rounded-md bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-rose-700 @if(!$hasBalance) opacity-50 pointer-events-none @endif">
+                            Download Neraca (PDF)
+                        </a>
+                    </div>
+                </section>
+
+                <!-- Surat Alat BG Actions -->
+                <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm space-y-4">
+                    <h4 class="font-bold text-slate-900 border-b border-slate-100 pb-3">Surat Pernyataan Alat BG</h4>
+
+                    @php
+                        $bgEquipmentCount = $company->equipment()->where('sbu_application_id', $application->id)->whereRaw('LOWER(category) = ?', ['bg'])->count();
+                        $hasBgEquip = $bgEquipmentCount > 0;
+                    @endphp
+
+                    @if (!$hasBgEquip)
+                        <div class="rounded-md border border-amber-200 bg-amber-50 p-3.5 text-xs text-amber-800 space-y-2">
+                            <p class="font-bold">⚠️ Warning / Peringatan</p>
+                            <p class="leading-relaxed">Belum ada peralatan konstruksi kategori BG (Bangunan Gedung) terdaftar untuk pengajuan ini. Anda wajib menginput peralatan kategori BG terlebih dahulu.</p>
+                            <a href="{{ route('companies.workspace.equipment.index', $company) }}" class="inline-block font-bold text-amber-900 underline hover:text-amber-950">
+                                Input Peralatan BG &rarr;
+                            </a>
+                        </div>
+                    @else
+                        <div class="text-xs text-slate-500 leading-relaxed bg-slate-50 border border-slate-100 rounded-md p-3">
+                            <p class="font-bold text-slate-700">Status Peralatan BG:</p>
+                            <p class="mt-1 font-semibold text-emerald-800">✓ Tersedia ({{ $bgEquipmentCount }} unit alat terdaftar)</p>
+                        </div>
+                    @endif
+
+                    <div class="grid gap-2">
+                        <a href="{{ route('companies.workspace.applications.equip_bg.preview', [$company, $application]) }}" target="_blank" class="inline-flex w-full items-center justify-center rounded-md border border-slate-300 bg-white px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 @if(!$hasBgEquip) opacity-50 pointer-events-none @endif">
+                            Preview Surat Alat BG
+                        </a>
+                        <a href="{{ route('companies.workspace.applications.equip_bg.download', [$company, $application]) }}" class="inline-flex w-full items-center justify-center rounded-md bg-rose-600 px-4 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-rose-700 @if(!$hasBgEquip) opacity-50 pointer-events-none @endif">
+                            Download Surat Alat (PDF)
+                        </a>
+                    </div>
+                </section>
+
                 <section class="rounded-lg border border-slate-200 bg-white p-5 shadow-sm space-y-5">
                     <h4 class="font-bold text-slate-900 border-b border-slate-100 pb-3">Informasi Sektor & Skema SBU</h4>
 

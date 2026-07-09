@@ -31,6 +31,7 @@
                     ],
                 ],
                 ['label' => 'Perusahaan', 'route' => 'companies.index'],
+                ['label' => 'Arsip Global', 'route' => 'archives.global'],
                 ['label' => 'Pengaturan', 'route' => 'settings.index'],
             ];
         @endphp
@@ -96,22 +97,19 @@
                     @isset($company)
                         @php
                             $workspaceNavigation = [
-                                ['label' => 'Dashboard', 'route' => 'companies.workspace.dashboard'],
-                                ['label' => 'Profil Perusahaan', 'route' => 'companies.workspace.profile.edit'],
-                                ['label' => 'Direktur', 'route' => 'companies.workspace.directors.index'],
-                                ['label' => 'PJBU', 'route' => 'companies.workspace.pjbus.index'],
-                                ['label' => 'Pengajuan', 'route' => 'companies.workspace.applications.index'],
-                                ['label' => 'PJTBU', 'route' => 'companies.workspace.pjtbus.index'],
-                                ['label' => 'PJSKBU', 'route' => 'companies.workspace.pjskbus.index'],
-                                ['label' => 'Tenaga Ahli', 'route' => 'companies.workspace.experts.index'],
-                                ['label' => 'Peralatan', 'route' => 'companies.workspace.equipment.index'],
-                                ['label' => 'Neraca', 'route' => 'companies.workspace.balance.index'],
-                                ['label' => 'Dokumen', 'route' => 'companies.workspace.documents.index'],
-                                ['label' => 'Generate', 'route' => 'companies.workspace.generate.index'],
-                                ['label' => 'Arsip', 'route' => 'companies.workspace.archives.index'],
+                                ['label' => 'Ringkasan', 'route' => 'companies.workspace.dashboard', 'active' => 'companies.workspace.dashboard'],
+                                ['label' => 'Profil', 'route' => 'companies.workspace.profile.edit', 'active' => 'companies.workspace.profile.*'],
+                                ['label' => 'Direktur/PJBU', 'route' => 'companies.workspace.directors_pjbus', 'active' => ['companies.workspace.directors_pjbus', 'companies.workspace.directors.*', 'companies.workspace.pjbus.*']],
+                                ['label' => 'Pengajuan', 'route' => 'companies.workspace.applications.index', 'active' => 'companies.workspace.applications.*'],
+                                ['label' => 'Tenaga Ahli', 'route' => 'companies.workspace.experts.index', 'active' => 'companies.workspace.experts.*'],
+                                ['label' => 'Peralatan', 'route' => 'companies.workspace.equipment.index', 'active' => 'companies.workspace.equipment.*'],
+                                ['label' => 'Neraca', 'route' => 'companies.workspace.balance.index', 'active' => 'companies.workspace.balance.*'],
+                                ['label' => 'Dokumen', 'route' => 'companies.workspace.documents.index', 'active' => 'companies.workspace.documents.*'],
+                                ['label' => 'Generate', 'route' => 'companies.workspace.generate.index', 'active' => 'companies.workspace.generate.*'],
+                                ['label' => 'Arsip', 'route' => 'companies.workspace.archives.index', 'active' => 'companies.workspace.archives.*'],
                             ];
                         @endphp
-
+ 
                         <section class="mb-6 rounded-lg border border-slate-200 bg-white p-4">
                             <div class="mb-3 flex flex-col gap-2 lg:flex-row lg:items-center lg:justify-between">
                                 <div>
@@ -122,12 +120,17 @@
                                     Kembali ke daftar perusahaan
                                 </a>
                             </div>
-
+ 
                             <nav class="flex gap-2 overflow-x-auto">
                                 @foreach ($workspaceNavigation as $item)
+                                    @php
+                                        $isActive = is_array($item['active'])
+                                            ? request()->routeIs(...$item['active'])
+                                            : request()->routeIs($item['active']);
+                                    @endphp
                                     <a
                                         href="{{ route($item['route'], $company) }}"
-                                        class="block whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition {{ request()->routeIs($item['route']) ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-950' }}"
+                                        class="block whitespace-nowrap rounded-md px-3 py-2 text-sm font-medium transition {{ $isActive ? 'bg-slate-900 text-white' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-950' }}"
                                     >
                                         {{ $item['label'] }}
                                     </a>

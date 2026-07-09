@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Company;
+use App\Models\Workspace\Application;
+use App\Models\Workspace\GeneratedDocument;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -9,12 +12,19 @@ class DashboardController extends Controller
     public function __invoke(): View
     {
         $stats = [
-            ['label' => 'Total Perusahaan', 'value' => '0', 'note' => 'Data dummy tahap awal'],
-            ['label' => 'Pengajuan Aktif', 'value' => '0', 'note' => 'Belum ada data pengajuan'],
-            ['label' => 'Dokumen Siap Generate', 'value' => '0', 'note' => 'Menunggu modul PDF'],
-            ['label' => 'Arsip Pengajuan', 'value' => '0', 'note' => 'Belum ada arsip'],
+            ['label' => 'Total Perusahaan', 'value' => Company::count(), 'note' => 'Badan usaha terdaftar'],
+            ['label' => 'Total Pengajuan', 'value' => Application::count(), 'note' => 'Semua status pengajuan'],
+            ['label' => 'Pengajuan Draft', 'value' => Application::where('status', 'draft')->count(), 'note' => 'Masih dalam penyusunan'],
+            ['label' => 'Pengajuan Selesai', 'value' => Application::where('status', 'selesai')->count(), 'note' => 'Sudah selesai diproses'],
+            ['label' => 'Dokumen Generated', 'value' => GeneratedDocument::count(), 'note' => 'Tersimpan di arsip'],
         ];
 
-        return view('dashboard', compact('stats'));
+        $latestCompanies = Company::query()
+            ->withCount(['applications', 'archives'])
+            ->latest()
+            ->take(8)
+            ->get();
+
+        return view('dashboard', compact('stats', 'latestCompanies'));
     }
 }
