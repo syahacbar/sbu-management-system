@@ -1,0 +1,145 @@
+<?php
+
+use App\Http\Controllers\AdminPageController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\CompanyController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\MasterKbliController;
+use App\Http\Controllers\MasterSbuClassificationController;
+use App\Http\Controllers\MasterSbuSchemeController;
+use App\Http\Controllers\MasterSbuSubclassificationController;
+use App\Http\Controllers\Master\MasterResourceController;
+use App\Http\Controllers\Workspace\CompanyProfileController;
+use App\Http\Controllers\Workspace\ApplicationController;
+use App\Http\Controllers\Workspace\GenerateController;
+use App\Http\Controllers\Workspace\WorkspaceDashboardController;
+use App\Http\Controllers\Workspace\WorkspaceResourceController;
+use Illuminate\Support\Facades\Route;
+
+Route::get('/', function () {
+    return redirect()->route('dashboard');
+})->middleware('auth');
+
+Route::middleware('guest')->group(function (): void {
+    Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
+    Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
+});
+
+Route::middleware('auth')->group(function (): void {
+    Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+    Route::get('/dashboard', DashboardController::class)->name('dashboard');
+
+    Route::prefix('master')->name('master.')->group(function (): void {
+        Route::get('kbli/download-template', [MasterKbliController::class, 'downloadTemplate'])->name('kbli.download-template');
+        Route::get('kbli/import', [MasterKbliController::class, 'importForm'])->name('kbli.import-form');
+        Route::post('kbli/import', [MasterKbliController::class, 'import'])->name('kbli.import');
+
+        Route::resource('kbli', MasterKbliController::class)
+            ->parameters(['kbli' => 'kbli']);
+        Route::get('klasifikasi/download-template', [MasterSbuClassificationController::class, 'downloadTemplate'])->name('classifications.download-template');
+        Route::get('klasifikasi/import', [MasterSbuClassificationController::class, 'importForm'])->name('classifications.import-form');
+        Route::post('klasifikasi/import', [MasterSbuClassificationController::class, 'import'])->name('classifications.import');
+
+        Route::resource('klasifikasi', MasterSbuClassificationController::class)
+            ->parameters(['klasifikasi' => 'classification'])
+            ->names('classifications');
+        Route::get('subklasifikasi/download-template', [MasterSbuSubclassificationController::class, 'downloadTemplate'])->name('subclassifications.download-template');
+        Route::get('subklasifikasi/import', [MasterSbuSubclassificationController::class, 'importForm'])->name('subclassifications.import-form');
+        Route::post('subklasifikasi/import', [MasterSbuSubclassificationController::class, 'import'])->name('subclassifications.import');
+
+        Route::resource('subklasifikasi', MasterSbuSubclassificationController::class)
+            ->parameters(['subklasifikasi' => 'subclassification'])
+            ->names('subclassifications');
+        Route::get('skema/download-template', [MasterSbuSchemeController::class, 'downloadTemplate'])->name('schemes.download-template');
+        Route::get('skema/import', [MasterSbuSchemeController::class, 'importForm'])->name('schemes.import-form');
+        Route::post('skema/import', [MasterSbuSchemeController::class, 'import'])->name('schemes.import');
+
+        Route::resource('skema', MasterSbuSchemeController::class)
+            ->parameters(['skema' => 'scheme'])
+            ->names('schemes');
+
+        $masterRoutes = function (string $uri, string $name): void {
+            Route::get($uri, [MasterResourceController::class, 'index'])
+                ->defaults('master_resource', $name)
+                ->name($name.'.index');
+            Route::get($uri.'/create', [MasterResourceController::class, 'create'])
+                ->defaults('master_resource', $name)
+                ->name($name.'.create');
+            Route::post($uri, [MasterResourceController::class, 'store'])
+                ->defaults('master_resource', $name)
+                ->name($name.'.store');
+            Route::get($uri.'/{item}/edit', [MasterResourceController::class, 'edit'])
+                ->defaults('master_resource', $name)
+                ->name($name.'.edit');
+            Route::put($uri.'/{item}', [MasterResourceController::class, 'update'])
+                ->defaults('master_resource', $name)
+                ->name($name.'.update');
+            Route::delete($uri.'/{item}', [MasterResourceController::class, 'destroy'])
+                ->defaults('master_resource', $name)
+                ->name($name.'.destroy');
+        };
+
+        $masterRoutes('kualifikasi', 'qualifications');
+        $masterRoutes('lsbu', 'lsbu');
+        $masterRoutes('asosiasi', 'associations');
+        $masterRoutes('bidang-keilmuan', 'science-fields');
+        $masterRoutes('peralatan-bg', 'bg-equipment');
+        $masterRoutes('peralatan-bs', 'bs-equipment');
+        $masterRoutes('item-neraca', 'balance-items');
+        $masterRoutes('template-dokumen', 'document-templates');
+    });
+
+    Route::resource('perusahaan', CompanyController::class)
+        ->parameters(['perusahaan' => 'company'])
+        ->names('companies');
+
+    Route::prefix('perusahaan/{company}/workspace')
+        ->name('companies.workspace.')
+        ->group(function (): void {
+            Route::get('/', WorkspaceDashboardController::class)->name('dashboard');
+            Route::get('/profil', [CompanyProfileController::class, 'edit'])->name('profile.edit');
+            Route::put('/profil', [CompanyProfileController::class, 'update'])->name('profile.update');
+            Route::get('/generate', GenerateController::class)->name('generate.index');
+
+            $workspaceRoutes = function (string $uri, string $name): void {
+                Route::get($uri, [WorkspaceResourceController::class, 'index'])
+                    ->defaults('workspace_resource', $name)
+                    ->name($name.'.index');
+                Route::get($uri.'/create', [WorkspaceResourceController::class, 'create'])
+                    ->defaults('workspace_resource', $name)
+                    ->name($name.'.create');
+                Route::post($uri, [WorkspaceResourceController::class, 'store'])
+                    ->defaults('workspace_resource', $name)
+                    ->name($name.'.store');
+                Route::get($uri.'/{item}/edit', [WorkspaceResourceController::class, 'edit'])
+                    ->defaults('workspace_resource', $name)
+                    ->name($name.'.edit');
+                Route::put($uri.'/{item}', [WorkspaceResourceController::class, 'update'])
+                    ->defaults('workspace_resource', $name)
+                    ->name($name.'.update');
+                Route::delete($uri.'/{item}', [WorkspaceResourceController::class, 'destroy'])
+                    ->defaults('workspace_resource', $name)
+                    ->name($name.'.destroy');
+            };
+
+            $workspaceRoutes('direktur', 'directors');
+            $workspaceRoutes('pjbu', 'pjbus');
+
+            Route::resource('pengajuan', ApplicationController::class)
+                ->parameters(['pengajuan' => 'application'])
+                ->names('applications');
+
+            $workspaceRoutes('pjtbu', 'pjtbus');
+            $workspaceRoutes('pjskbu', 'pjskbus');
+            $workspaceRoutes('tenaga-ahli', 'experts');
+            $workspaceRoutes('peralatan', 'equipment');
+            $workspaceRoutes('neraca', 'balance');
+            $workspaceRoutes('dokumen', 'documents');
+            $workspaceRoutes('arsip', 'archives');
+        });
+
+    Route::get('/pengaturan', [AdminPageController::class, '__invoke'])
+        ->defaults('page', 'settings')
+        ->name('settings.index');
+});
