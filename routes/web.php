@@ -106,7 +106,6 @@ Route::middleware('auth')->group(function (): void {
             Route::get('/', WorkspaceDashboardController::class)->name('dashboard');
             Route::get('/profil', [CompanyProfileController::class, 'edit'])->name('profile.edit');
             Route::put('/profil', [CompanyProfileController::class, 'update'])->name('profile.update');
-            Route::get('/generate', GenerateController::class)->name('generate.index');
 
             $workspaceRoutes = function (string $uri, string $name): void {
                 Route::get($uri, [WorkspaceResourceController::class, 'index'])
