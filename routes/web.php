@@ -9,8 +9,11 @@ use App\Http\Controllers\MasterSbuClassificationController;
 use App\Http\Controllers\MasterSbuSchemeController;
 use App\Http\Controllers\MasterSbuSubclassificationController;
 use App\Http\Controllers\Master\MasterResourceController;
+use App\Http\Controllers\Master\MasterDocumentTemplateController;
 use App\Http\Controllers\Workspace\CompanyProfileController;
 use App\Http\Controllers\Workspace\ApplicationController;
+use App\Http\Controllers\Workspace\ApplicationDocumentController;
+use App\Http\Controllers\Workspace\ArchiveController;
 use App\Http\Controllers\Workspace\GenerateController;
 use App\Http\Controllers\Workspace\WorkspaceDashboardController;
 use App\Http\Controllers\Workspace\WorkspaceResourceController;
@@ -87,7 +90,10 @@ Route::middleware('auth')->group(function (): void {
         $masterRoutes('peralatan-bg', 'bg-equipment');
         $masterRoutes('peralatan-bs', 'bs-equipment');
         $masterRoutes('item-neraca', 'balance-items');
-        $masterRoutes('template-dokumen', 'document-templates');
+
+        Route::resource('template-dokumen', MasterDocumentTemplateController::class)
+            ->parameters(['template-dokumen' => 'document_template'])
+            ->names('document-templates');
     });
 
     Route::resource('perusahaan', CompanyController::class)
@@ -130,13 +136,25 @@ Route::middleware('auth')->group(function (): void {
                 ->parameters(['pengajuan' => 'application'])
                 ->names('applications');
 
+            Route::post('pengajuan/{application}/documents', [ApplicationDocumentController::class, 'upload'])->name('applications.documents.upload');
+            Route::delete('pengajuan/{application}/documents/{document}', [ApplicationDocumentController::class, 'destroy'])->name('applications.documents.destroy');
+            Route::get('pengajuan/{application}/documents/{document}/download', [ApplicationDocumentController::class, 'download'])->name('applications.documents.download');
+
             $workspaceRoutes('pjtbu', 'pjtbus');
             $workspaceRoutes('pjskbu', 'pjskbus');
             $workspaceRoutes('tenaga-ahli', 'experts');
             $workspaceRoutes('peralatan', 'equipment');
             $workspaceRoutes('neraca', 'balance');
             $workspaceRoutes('dokumen', 'documents');
-            $workspaceRoutes('arsip', 'archives');
+
+            Route::resource('arsip', ArchiveController::class)
+                ->only(['index', 'show', 'destroy'])
+                ->parameters(['arsip' => 'archive'])
+                ->names('archives');
+
+            Route::get('generate', [GenerateController::class, 'index'])->name('generate.index');
+            Route::get('generate/preview', [GenerateController::class, 'preview'])->name('generate.preview');
+            Route::post('generate/archive', [GenerateController::class, 'saveArchive'])->name('generate.save-archive');
         });
 
     Route::get('/pengaturan', [AdminPageController::class, '__invoke'])

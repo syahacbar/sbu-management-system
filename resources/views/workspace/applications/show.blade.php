@@ -87,6 +87,87 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Checklist Kelengkapan Dokumen SBU -->
+                <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+                    <div class="border-b border-slate-200 p-5">
+                        <h3 class="text-lg font-semibold text-slate-950">Checklist Kelengkapan Dokumen SBU</h3>
+                        <p class="mt-1 text-sm text-slate-500">Unggah dan verifikasi berkas administrasi asli untuk pengajuan SBU ini.</p>
+                    </div>
+
+                    <div class="p-5 space-y-4">
+                        @php
+                            $requirements = [
+                                'Akta Pendirian' => ['required' => true, 'desc' => 'Akta pendirian awal perusahaan resmi yang sah.'],
+                                'Akta Perubahan' => ['required' => false, 'desc' => 'Akta perubahan direksi atau modal terbaru (jika ada).'],
+                                'NIB (Nomor Induk Berusaha)' => ['required' => true, 'desc' => 'NIB aktif dari sistem OSS RBA.'],
+                                'NPWP Perusahaan' => ['required' => true, 'desc' => 'Kartu NPWP atas nama badan usaha.'],
+                                'Neraca Keuangan' => ['required' => true, 'desc' => 'Laporan posisi keuangan / neraca tahun terakhir.'],
+                                'Surat Pernyataan PJBU / PJT' => ['required' => true, 'desc' => 'Surat penunjukan dan keabsahan penanggung jawab.'],
+                            ];
+                            $uploadedDocs = $application->documents->keyBy('requirement_name');
+                        @endphp
+
+                        @foreach ($requirements as $name => $meta)
+                            @php
+                                $doc = $uploadedDocs->get($name);
+                            @endphp
+                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 rounded-lg border border-slate-100 p-4 hover:bg-slate-50/50 transition">
+                                <div class="space-y-1 max-w-md">
+                                    <div class="flex items-center gap-2">
+                                        <h4 class="text-sm font-bold text-slate-800">{{ $name }}</h4>
+                                        @if ($meta['required'])
+                                            <span class="inline-block rounded bg-rose-50 px-1.5 py-0.5 text-[10px] font-bold text-rose-700 uppercase">Wajib</span>
+                                        @else
+                                            <span class="inline-block rounded bg-slate-50 px-1.5 py-0.5 text-[10px] font-bold text-slate-500 uppercase">Opsional</span>
+                                        @endif
+                                    </div>
+                                    <p class="text-xs text-slate-500 leading-relaxed">{{ $meta['desc'] }}</p>
+                                </div>
+
+                                <div class="flex items-center gap-3">
+                                    @if ($doc)
+                                        <div class="flex flex-col items-end gap-1">
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="inline-flex h-2 w-2 rounded-full bg-emerald-500"></span>
+                                                <span class="text-xs font-semibold text-emerald-800">Sudah Dilampirkan</span>
+                                            </div>
+                                            <p class="text-[10px] text-slate-400 max-w-[180px] truncate" title="{{ $doc->file_name }}">{{ $doc->file_name }}</p>
+                                            <div class="flex gap-2 mt-1">
+                                                <a href="{{ route('companies.workspace.applications.documents.download', [$company, $application, $doc]) }}" class="text-xs font-bold text-emerald-700 hover:text-emerald-800 transition">
+                                                    Unduh
+                                                </a>
+                                                <span class="text-slate-300 text-xs">|</span>
+                                                <form method="POST" action="{{ route('companies.workspace.applications.documents.destroy', [$company, $application, $doc]) }}" onsubmit="return confirm('Hapus dokumen {{ $name }} ini?')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="text-xs font-bold text-red-600 hover:text-red-700 transition">
+                                                        Hapus
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    @else
+                                        <div class="flex flex-col items-end gap-1">
+                                            <div class="flex items-center gap-1.5">
+                                                <span class="inline-flex h-2 w-2 rounded-full bg-slate-300"></span>
+                                                <span class="text-xs font-semibold text-slate-500">Belum Dilampirkan</span>
+                                            </div>
+                                            <form method="POST" action="{{ route('companies.workspace.applications.documents.upload', [$company, $application]) }}" enctype="multipart/form-data" class="flex items-center gap-1 mt-1">
+                                                @csrf
+                                                <input type="hidden" name="requirement_name" value="{{ $name }}">
+                                                <label class="cursor-pointer rounded-md bg-white border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 focus-within:ring-2 focus-within:ring-emerald-500">
+                                                    <span>Unggah</span>
+                                                    <input type="file" name="file" accept=".pdf,.png,.jpg,.jpeg" required class="sr-only" onchange="this.form.submit()">
+                                                </label>
+                                            </form>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
             </section>
 
             <!-- Domain SBU Sidebar Relation Details -->

@@ -7,15 +7,10 @@ use App\Models\Master\Association;
 use App\Models\Master\BalanceItem;
 use App\Models\Master\BgEquipment;
 use App\Models\Master\BsEquipment;
-use App\Models\Master\Classification;
-use App\Models\Master\DocumentTemplate;
-use App\Models\Master\Kbli;
 use App\Models\Master\Lsbu;
 use App\Models\Master\MasterReference;
 use App\Models\Master\Qualification;
-use App\Models\Master\Scheme;
 use App\Models\Master\ScienceField;
-use App\Models\Master\Subclassification;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -112,10 +107,6 @@ class MasterResourceController extends Controller
     private function resources(): array
     {
         return [
-            'kbli' => ['title' => 'KBLI', 'route' => 'master.kbli', 'model' => Kbli::class],
-            'classifications' => ['title' => 'Klasifikasi', 'route' => 'master.classifications', 'model' => Classification::class],
-            'subclassifications' => ['title' => 'Subklasifikasi', 'route' => 'master.subclassifications', 'model' => Subclassification::class],
-            'schemes' => ['title' => 'Skema', 'route' => 'master.schemes', 'model' => Scheme::class],
             'qualifications' => ['title' => 'Kualifikasi', 'route' => 'master.qualifications', 'model' => Qualification::class],
             'lsbu' => ['title' => 'LSBU', 'route' => 'master.lsbu', 'model' => Lsbu::class],
             'associations' => ['title' => 'Asosiasi', 'route' => 'master.associations', 'model' => Association::class],
@@ -123,7 +114,6 @@ class MasterResourceController extends Controller
             'bg-equipment' => ['title' => 'Peralatan BG', 'route' => 'master.bg-equipment', 'model' => BgEquipment::class],
             'bs-equipment' => ['title' => 'Peralatan BS', 'route' => 'master.bs-equipment', 'model' => BsEquipment::class],
             'balance-items' => ['title' => 'Item Neraca', 'route' => 'master.balance-items', 'model' => BalanceItem::class],
-            'document-templates' => ['title' => 'Template Dokumen', 'route' => 'master.document-templates', 'model' => DocumentTemplate::class],
         ];
     }
 

@@ -7,6 +7,7 @@ use App\Models\MasterSbuClassification;
 use App\Models\MasterSbuSubclassification;
 use App\Models\MasterSbuScheme;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Application extends WorkspaceRecord
 {
@@ -45,5 +46,10 @@ class Application extends WorkspaceRecord
     public function scheme(): BelongsTo
     {
         return $this->belongsTo(MasterSbuScheme::class, 'master_sbu_scheme_id');
+    }
+
+    public function documents(): HasMany
+    {
+        return $this->hasMany(ApplicationDocument::class, 'company_application_id');
     }
 }

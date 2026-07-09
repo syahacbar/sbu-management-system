@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Workspace;
 
 use App\Http\Controllers\Controller;
 use App\Models\Company;
-use App\Models\Workspace\Archive;
 use App\Models\Workspace\Application;
 use App\Models\Workspace\BalanceEntry;
 use App\Models\Workspace\Director;
@@ -123,7 +122,6 @@ class WorkspaceResourceController extends Controller
             'equipment' => ['title' => 'Peralatan', 'route' => 'companies.workspace.equipment', 'relation' => 'equipment', 'model' => Equipment::class],
             'balance' => ['title' => 'Neraca', 'route' => 'companies.workspace.balance', 'relation' => 'balanceEntries', 'model' => BalanceEntry::class],
             'documents' => ['title' => 'Dokumen', 'route' => 'companies.workspace.documents', 'relation' => 'documents', 'model' => Document::class],
-            'archives' => ['title' => 'Arsip', 'route' => 'companies.workspace.archives', 'relation' => 'archives', 'model' => Archive::class],
         ];
     }
 
