@@ -1,58 +1,227 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SBU Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Sistem informasi manajemen sertifikasi **SBU (Sertifikat Badan Usaha)** bidang jasa konstruksi. Digunakan untuk mengelola data perusahaan, pengajuan sertifikasi, kelengkapan dokumen, tenaga ahli, peralatan, laporan keuangan, hingga generate dokumen PDF (sertifikat, SPTJM, neraca, dll).
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Teknologi
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+| Komponen | Teknologi |
+|----------|-----------|
+| **Framework** | Laravel 13.x |
+| **PHP** | ^8.3 |
+| **Database** | MySQL (via Laragon) |
+| **CSS** | Tailwind CSS 4 |
+| **Build Tool** | Vite 8 + `laravel-vite-plugin` |
+| **PDF** | Barryvdh DomPDF |
+| **Session/Cache/Queue** | Database driver (default) |
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## Cara Install
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Prasyarat
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+- PHP ^8.3
+- Composer
+- Node.js & npm
+- MySQL (via Laragon atau standalone)
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+### Langkah
 
 ```bash
-composer require laravel/boost --dev
+# 1. Clone repositori
+git clone <repo-url> sbu-management-system
+cd sbu-management-system
 
-php artisan boost:install
+# 2. Install dependensi PHP
+composer install
+
+# 3. Install dependensi frontend
+npm install
+
+# 4. Build asset frontend
+npm run build
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+---
 
-## Contributing
+## Setup .env
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```bash
+# Salin file environment
+cp .env.example .env
+```
 
-## Code of Conduct
+Sesuaikan isi `.env` terutama bagian database:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```env
+APP_NAME=SBU Management System
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost
 
-## Security Vulnerabilities
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=sbu_management_system
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Pastikan database `sbu_management_system` sudah dibuat di MySQL.
 
-## License
+```bash
+# Generate APP_KEY
+php artisan key:generate
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## Migrate dan Seed
+
+```bash
+# Jalankan migration
+php artisan migrate
+
+# Jalankan seeder (data dummy + demo)
+php artisan db:seed
+```
+
+Seeder akan membuat:
+- 1 user admin
+- 4 data KBLI
+- 3 klasifikasi SBU + 6 subklasifikasi
+- 3 skema SBU
+- Referensi master (kualifikasi, LSBU, asosiasi, bidang keilmuan, peralatan, item neraca, template dokumen)
+- 2 perusahaan dummy + workspace lengkap (direktur, PJBU, pengajuan, tenaga ahli, peralatan, neraca, dokumen, arsip)
+
+---
+
+## Menjalankan Server
+
+```bash
+php artisan serve
+```
+
+Akses di **http://localhost:8000**
+
+Untuk development dengan Vite (hot reload CSS):
+
+```bash
+npm run dev
+```
+
+---
+
+## Akun Demo
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | `admin@sbu.local` | `password` |
+
+> Semua user memiliki akses penuh (belum ada role/permission system).
+
+---
+
+## Alur Penggunaan
+
+### 1. Login
+
+Buka `/login`, masukkan email dan password admin. Setelah login akan diarahkan ke dashboard.
+
+### 2. Buat Perusahaan
+
+- Menu **Perusahaan** -> **Tambah Perusahaan**
+- Isi data: NIB, NPWP, nama, alamat lengkap, jenis badan usaha, kualifikasi
+- Setelah tersimpan, masuk ke workspace perusahaan
+
+### 3. Buat Pengajuan
+
+Di workspace perusahaan, menu **Pengajuan** -> **Buat Pengajuan**:
+- Pilih KBLI, klasifikasi, subklasifikasi, dan skema
+- Isi LSBU dan asosiasi
+- Status awal: `draft`
+
+### 4. Lengkapi Data
+
+ sebelum pengajuan dapat diproses, lengkapi:
+
+| Data | Menu | Keterangan |
+|------|------|-----------|
+| **Direktur & PJBU** | Direktur/PJBU | Minimal 1 direktur (is_main) dan 1 PJBU (is_main) |
+| **Tenaga Ahli** | Tenaga Ahli | Tambah PJTBU/PJSKBU/tenaga ahli dengan data SKK |
+| **Peralatan** | Peralatan | Pilih dari master equipment, isi jumlah & kepemilikan |
+| **Neraca Keuangan** | Neraca | Isi nilai aset, kewajiban, dan ekuitas |
+| **Dokumen** | Dokumen | Upload NIB, NPWP, dan dokumen pendukung lainnya |
+
+### 5. Generate PDF
+
+Setelah data lengkap, buka menu **Generate**:
+- Pilih template dokumen yang tersedia (Sertifikat SBU, SPTJM, Neraca)
+- Klik **Preview** untuk melihat hasil
+- Klik **Download** untuk mengunduh PDF
+- Klik **Arsipkan** untuk menyimpan ke arsip
+
+PDF yang dapat di-generate per pengajuan:
+- **SMAP** (Surat Permohonan)
+- **SPTJM** (Surat Pernyataan Tanggung Jawab Mutlak)
+- **Lampiran Tenaga Ahli**
+- **Neraca Keuangan**
+- **Surat Alat BG**
+- **Surat Alat BS**
+
+### 6. Manajemen Status Pengajuan
+
+Status pengajuan dapat diubah melalui tombol **Update Status**:
+
+`draft` -> `berkas_belum_lengkap` -> `berkas_lengkap` -> `proses` -> `revisi` -> `terbit` -> `selesai`
+
+### 7. Arsip
+
+Dokumen yang sudah di-generate dan diarsipkan dapat dilihat di menu **Arsip** (per perusahaan) atau **Arsip Global** (semua perusahaan).
+
+---
+
+## Catatan Development
+
+### Struktur Direktori Penting
+
+```
+app/
+├── Http/Controllers/        # 21 controller
+│   ├── Auth/                # AuthenticatedSessionController
+│   ├── Master/              # MasterResourceController, MasterDocumentTemplateController
+│   └── Workspace/           # ApplicationController, GenerateController, dll
+├── Models/                  # 25 model
+│   ├── Master/              # Master reference models
+│   └── Workspace/           # Application, CompanyPerson, dll
+├── Services/
+│   └── PdfDocumentService   # Layanan generate PDF
+├── Helpers/
+│   └── SimpleXlsxReader     # Parser XLSX (custom)
+database/
+├── migrations/              # 23 migration
+└── seeders/
+    └── DatabaseSeeder.php   # Seeder utama
+resources/
+└── views/
+    ├── auth/                # Login
+    ├── companies/           # CRUD perusahaan
+    ├── master/              # Master data (KBLI, klasifikasi, dll)
+    ├── workspace/           # Workspace perusahaan
+    ├── pdf/                 # Template PDF
+    └── components/layouts/  # Layout admin
+routes/
+└── web.php                  # Semua route (225 baris)
+```
+
+### Catatan
+
+- Semua route menggunakan session-based auth (web), tidak ada API route
+- PDF template menggunakan token replacement: `{company_name}`, `{application_code}`, `{director_name}`, dll
+- Template dokumen disimpan di tabel `master_document_templates` dan bisa diedit via menu Master -> Template Dokumen
+- Tanda tangan & stempel dibaca dari file gambar (path dikonfigurasi di konfigurasi masing-masing)
+- Fungsi import Excel untuk master data menggunakan `SimpleXlsxReader` (custom, bukan library pihak ketiga)
+- Session, cache, dan queue menggunakan database driver (dapat diubah ke file/redis untuk production)
+- Beberapa model legacy (`Director`, `Pjbu`, `Pjtbu`, `Pjskbu`, `Equipment`, `Document`, dll) masih ada tapi tidak digunakan (tabelnya sudah di-drop migration)

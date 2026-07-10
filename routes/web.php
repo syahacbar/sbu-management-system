@@ -13,7 +13,6 @@ use App\Http\Controllers\Master\MasterDocumentTemplateController;
 use App\Http\Controllers\Workspace\CompanyProfileController;
 use App\Http\Controllers\Workspace\ApplicationController;
 use App\Http\Controllers\Workspace\ApplicationDocumentController;
-use App\Http\Controllers\Workspace\ArchiveController;
 use App\Http\Controllers\Workspace\GenerateController;
 use App\Http\Controllers\Workspace\WorkspaceDashboardController;
 use App\Http\Controllers\Workspace\WorkspaceResourceController;

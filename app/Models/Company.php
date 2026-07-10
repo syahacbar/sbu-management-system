@@ -8,9 +8,7 @@ use App\Models\Workspace\FinancialStatement;
 use App\Models\Workspace\CompanyPerson;
 use App\Models\Workspace\ApplicationDocument;
 use App\Models\Workspace\CompanyEquipment;
-use App\Models\Workspace\Expert;
-use App\Models\Workspace\Pjskbu;
-use App\Models\Workspace\Pjtbu;
+
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -79,20 +77,6 @@ class Company extends Model
         return $this->hasMany(Application::class);
     }
 
-    public function pjtbus(): HasMany
-    {
-        return $this->hasMany(Pjtbu::class);
-    }
-
-    public function pjskbus(): HasMany
-    {
-        return $this->hasMany(Pjskbu::class);
-    }
-
-    public function experts(): HasMany
-    {
-        return $this->hasMany(Expert::class);
-    }
 
     public function equipment(): HasMany
     {
