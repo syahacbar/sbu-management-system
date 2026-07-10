@@ -8,6 +8,7 @@ use App\Models\MasterSbuClassification;
 use App\Models\MasterSbuScheme;
 use App\Models\MasterSbuSubclassification;
 use App\Models\User;
+use Database\Seeders\SettingSeeder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -33,6 +34,8 @@ class DatabaseSeeder extends Seeder
         $this->seedGenericMasterReferences();
         $this->seedMasterFinancialItems();
         $this->seedCompaniesAndWorkspaces();
+
+        $this->call(SettingSeeder::class);
     }
 
     private function seedMasterKblis(): void

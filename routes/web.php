@@ -10,6 +10,7 @@ use App\Http\Controllers\MasterSbuSchemeController;
 use App\Http\Controllers\MasterSbuSubclassificationController;
 use App\Http\Controllers\Master\MasterResourceController;
 use App\Http\Controllers\Master\MasterDocumentTemplateController;
+use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Workspace\CompanyProfileController;
 use App\Http\Controllers\Workspace\ApplicationController;
 use App\Http\Controllers\Workspace\ApplicationDocumentController;
@@ -218,7 +219,9 @@ Route::middleware('auth')->group(function (): void {
             Route::get('generate/pdf/{application}/{template}/download', [GenerateDocumentController::class, 'download'])->name('generate.pdf.download');
         });
 
-    Route::get('/pengaturan', [AdminPageController::class, '__invoke'])
-        ->defaults('page', 'settings')
-        ->name('settings.index');
+    Route::get('/pengaturan', [SettingsController::class, 'index'])->name('settings.index');
+    Route::post('/pengaturan', [SettingsController::class, 'update'])->name('settings.update');
+    Route::post('/pengaturan/profil', [SettingsController::class, 'updateProfile'])->name('settings.profile.update');
+    Route::post('/pengaturan/backup-database', [SettingsController::class, 'backupDatabase'])->name('settings.backup.database');
+    Route::post('/pengaturan/backup-storage', [SettingsController::class, 'backupStorage'])->name('settings.backup.storage');
 });

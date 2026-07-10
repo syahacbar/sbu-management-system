@@ -32,20 +32,20 @@
                 ],
                 ['label' => 'Perusahaan', 'route' => 'companies.index'],
                 ['label' => 'Arsip Global', 'route' => 'archives.global'],
-                ['label' => 'Pengaturan', 'route' => 'settings.index'],
+                ['label' => 'Pengaturan', 'route' => 'settings.index', 'active' => 'settings.*'],
             ];
         @endphp
 
         <div class="min-h-screen lg:flex">
-            <aside class="border-b border-slate-200 bg-white lg:fixed lg:inset-y-0 lg:left-0 lg:w-72 lg:border-b-0 lg:border-r">
-                <div class="flex h-20 items-center border-b border-slate-200 px-6">
+            <aside class="border-b border-slate-200 bg-white lg:fixed lg:inset-y-0 lg:left-0 lg:flex lg:w-72 lg:flex-col lg:border-b-0 lg:border-r">
+                <div class="flex h-20 shrink-0 items-center border-b border-slate-200 px-6">
                     <div>
                         <p class="text-sm font-semibold uppercase tracking-wide text-emerald-700">Internal Admin</p>
                         <h1 class="text-lg font-bold text-slate-950">Manajemen SBU</h1>
                     </div>
                 </div>
 
-                <nav class="flex gap-2 overflow-x-auto px-4 py-4 lg:block lg:space-y-1 lg:overflow-visible">
+                <nav class="flex gap-2 overflow-x-auto px-4 py-4 lg:block lg:flex-1 lg:space-y-1 lg:overflow-y-auto">
                     @foreach ($navigation as $item)
                         @if (isset($item['children']))
                             <div class="min-w-max lg:min-w-0">
@@ -65,9 +65,14 @@
                                 </div>
                             </div>
                         @else
+                            @php
+                                $isActive = isset($item['active'])
+                                    ? request()->routeIs($item['active'])
+                                    : request()->routeIs($item['route']);
+                            @endphp
                             <a
                                 href="{{ route($item['route']) }}"
-                                class="block whitespace-nowrap rounded-md px-4 py-2.5 text-sm font-medium transition {{ request()->routeIs($item['route']) ? 'bg-emerald-700 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-950' }}"
+                                class="block whitespace-nowrap rounded-md px-4 py-2.5 text-sm font-medium transition {{ $isActive ? 'bg-emerald-700 text-white shadow-sm' : 'text-slate-700 hover:bg-slate-100 hover:text-slate-950' }}"
                             >
                                 {{ $item['label'] }}
                             </a>

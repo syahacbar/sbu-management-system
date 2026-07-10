@@ -15,7 +15,12 @@
                 <div class="mb-8">
                     <p class="text-sm font-semibold uppercase tracking-wide text-emerald-700">Admin SBU</p>
                     <h1 class="mt-2 text-2xl font-bold text-slate-950">Masuk ke sistem</h1>
-                    <p class="mt-2 text-sm text-slate-500">Gunakan akun admin untuk mengelola pengajuan SBU.</p>
+                    <p class="mt-2 text-sm text-slate-500">
+                        Gunakan akun admin untuk mengelola pengajuan SBU.<br><br>
+                        <b><u>Akun Demo:</u></b><br>
+                        Email: <code>admin@sbu.local</code><br>
+                        Password: <code>password</code>
+                    </p>
                 </div>
 
                 <form method="POST" action="{{ route('login.store') }}" class="space-y-5">
