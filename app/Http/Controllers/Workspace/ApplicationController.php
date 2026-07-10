@@ -9,6 +9,7 @@ use App\Models\MasterKbli;
 use App\Models\MasterSbuClassification;
 use App\Models\MasterSbuSubclassification;
 use App\Models\MasterSbuScheme;
+use App\Models\Setting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -17,6 +18,7 @@ use Illuminate\View\View;
 
 class ApplicationController extends Controller
 {
+    use Concerns\LoadsDocumentImages;
     public function index(Request $request, Company $company): View
     {
         $search = $request->string('search')->toString();
@@ -58,7 +60,8 @@ class ApplicationController extends Controller
         $year = (int) $validated['application_year'];
         $count = $company->applications()->where('application_year', $year)->count();
         $seq = str_pad($count + 1, 4, '0', STR_PAD_LEFT);
-        $validated['application_number'] = "PNJ-{$year}-{$seq}";
+        $prefix = Setting::get('app_prefix_number', 'PNJ');
+        $validated['application_number'] = "{$prefix}-{$year}-{$seq}";
 
         // Jika ini pengajuan pertama, otomatis jadikan aktif
         $hasAny = $company->applications()->exists();
@@ -243,24 +246,7 @@ class ApplicationController extends Controller
 
         $formattedDate = $this->formatIndonesianDate(now());
 
-        // Get stamp/TTE if template is available
-        $template = \App\Models\Master\DocumentTemplate::where('is_active', true)->where('name', 'like', '%SPTJM%')->first();
-        $stampBase64 = null;
-        $signatureBase64 = null;
-        if ($template) {
-            if ($template->stamp_path) {
-                $stampPath = storage_path('app/public/' . $template->stamp_path);
-                if (file_exists($stampPath)) {
-                    $stampBase64 = 'data:image/' . pathinfo($stampPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($stampPath));
-                }
-            }
-            if ($template->signature_path) {
-                $signaturePath = storage_path('app/public/' . $template->signature_path);
-                if (file_exists($signaturePath)) {
-                    $signatureBase64 = 'data:image/' . pathinfo($signaturePath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($signaturePath));
-                }
-            }
-        }
+        [$stampBase64, $signatureBase64] = $this->loadDocumentImages('SPTJM');
 
         return response(view('pdf.sptjm', compact('company', 'application', 'pjbu', 'formattedDate', 'stampBase64', 'signatureBase64'))->render(), 200, [
             'Content-Type' => 'text/html',
@@ -280,24 +266,7 @@ class ApplicationController extends Controller
 
         $formattedDate = $this->formatIndonesianDate(now());
 
-        // Get stamp/TTE if template is available
-        $template = \App\Models\Master\DocumentTemplate::where('is_active', true)->where('name', 'like', '%SPTJM%')->first();
-        $stampBase64 = null;
-        $signatureBase64 = null;
-        if ($template) {
-            if ($template->stamp_path) {
-                $stampPath = storage_path('app/public/' . $template->stamp_path);
-                if (file_exists($stampPath)) {
-                    $stampBase64 = 'data:image/' . pathinfo($stampPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($stampPath));
-                }
-            }
-            if ($template->signature_path) {
-                $signaturePath = storage_path('app/public/' . $template->signature_path);
-                if (file_exists($signaturePath)) {
-                    $signatureBase64 = 'data:image/' . pathinfo($signaturePath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($signaturePath));
-                }
-            }
-        }
+        [$stampBase64, $signatureBase64] = $this->loadDocumentImages('SPTJM');
 
         $html = view('pdf.sptjm', compact('company', 'application', 'pjbu', 'formattedDate', 'stampBase64', 'signatureBase64'))->render();
 
@@ -337,24 +306,7 @@ class ApplicationController extends Controller
 
         $formattedDate = $this->formatIndonesianDate(now());
 
-        // Get stamp/TTE if template is available
-        $template = \App\Models\Master\DocumentTemplate::where('is_active', true)->where('name', 'like', '%lampiran%')->first();
-        $stampBase64 = null;
-        $signatureBase64 = null;
-        if ($template) {
-            if ($template->stamp_path) {
-                $stampPath = storage_path('app/public/' . $template->stamp_path);
-                if (file_exists($stampPath)) {
-                    $stampBase64 = 'data:image/' . pathinfo($stampPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($stampPath));
-                }
-            }
-            if ($template->signature_path) {
-                $signaturePath = storage_path('app/public/' . $template->signature_path);
-                if (file_exists($signaturePath)) {
-                    $signatureBase64 = 'data:image/' . pathinfo($signaturePath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($signaturePath));
-                }
-            }
-        }
+        [$stampBase64, $signatureBase64] = $this->loadDocumentImages('lampiran');
 
         return response(view('pdf.lampiran-tenaga-ahli', compact('company', 'application', 'pjbu', 'pjtbuList', 'pjskbuList', 'formattedDate', 'stampBase64', 'signatureBase64'))->render(), 200, [
             'Content-Type' => 'text/html',
@@ -377,24 +329,7 @@ class ApplicationController extends Controller
 
         $formattedDate = $this->formatIndonesianDate(now());
 
-        // Get stamp/TTE if template is available
-        $template = \App\Models\Master\DocumentTemplate::where('is_active', true)->where('name', 'like', '%lampiran%')->first();
-        $stampBase64 = null;
-        $signatureBase64 = null;
-        if ($template) {
-            if ($template->stamp_path) {
-                $stampPath = storage_path('app/public/' . $template->stamp_path);
-                if (file_exists($stampPath)) {
-                    $stampBase64 = 'data:image/' . pathinfo($stampPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($stampPath));
-                }
-            }
-            if ($template->signature_path) {
-                $signaturePath = storage_path('app/public/' . $template->signature_path);
-                if (file_exists($signaturePath)) {
-                    $signatureBase64 = 'data:image/' . pathinfo($signaturePath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($signaturePath));
-                }
-            }
-        }
+        [$stampBase64, $signatureBase64] = $this->loadDocumentImages('lampiran');
 
         $html = view('pdf.lampiran-tenaga-ahli', compact('company', 'application', 'pjbu', 'pjtbuList', 'pjskbuList', 'formattedDate', 'stampBase64', 'signatureBase64'))->render();
 
@@ -442,24 +377,7 @@ class ApplicationController extends Controller
         $kewajiban = $values->filter(fn($v) => $v->masterItem->section === 'pasiva' && $v->masterItem->group_name === 'kewajiban');
         $ekuitas = $values->filter(fn($v) => $v->masterItem->section === 'pasiva' && $v->masterItem->group_name === 'ekuitas');
 
-        // Get stamp/TTE if template is available
-        $template = \App\Models\Master\DocumentTemplate::where('is_active', true)->where('name', 'like', '%neraca%')->first();
-        $stampBase64 = null;
-        $signatureBase64 = null;
-        if ($template) {
-            if ($template->stamp_path) {
-                $stampPath = storage_path('app/public/' . $template->stamp_path);
-                if (file_exists($stampPath)) {
-                    $stampBase64 = 'data:image/' . pathinfo($stampPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($stampPath));
-                }
-            }
-            if ($template->signature_path) {
-                $signaturePath = storage_path('app/public/' . $template->signature_path);
-                if (file_exists($signaturePath)) {
-                    $signatureBase64 = 'data:image/' . pathinfo($signaturePath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($signaturePath));
-                }
-            }
-        }
+        [$stampBase64, $signatureBase64] = $this->loadDocumentImages('neraca');
 
         return response(view('pdf.neraca', compact('company', 'application', 'pjbu', 'statement', 'aktivaLancar', 'aktivaTetap', 'kewajiban', 'ekuitas', 'formattedDate', 'stampBase64', 'signatureBase64'))->render(), 200, [
             'Content-Type' => 'text/html',
@@ -490,24 +408,7 @@ class ApplicationController extends Controller
         $kewajiban = $values->filter(fn($v) => $v->masterItem->section === 'pasiva' && $v->masterItem->group_name === 'kewajiban');
         $ekuitas = $values->filter(fn($v) => $v->masterItem->section === 'pasiva' && $v->masterItem->group_name === 'ekuitas');
 
-        // Get stamp/TTE if template is available
-        $template = \App\Models\Master\DocumentTemplate::where('is_active', true)->where('name', 'like', '%neraca%')->first();
-        $stampBase64 = null;
-        $signatureBase64 = null;
-        if ($template) {
-            if ($template->stamp_path) {
-                $stampPath = storage_path('app/public/' . $template->stamp_path);
-                if (file_exists($stampPath)) {
-                    $stampBase64 = 'data:image/' . pathinfo($stampPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($stampPath));
-                }
-            }
-            if ($template->signature_path) {
-                $signaturePath = storage_path('app/public/' . $template->signature_path);
-                if (file_exists($signaturePath)) {
-                    $signatureBase64 = 'data:image/' . pathinfo($signaturePath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($signaturePath));
-                }
-            }
-        }
+        [$stampBase64, $signatureBase64] = $this->loadDocumentImages('neraca');
 
         $html = view('pdf.neraca', compact('company', 'application', 'pjbu', 'statement', 'aktivaLancar', 'aktivaTetap', 'kewajiban', 'ekuitas', 'formattedDate', 'stampBase64', 'signatureBase64'))->render();
 
@@ -546,24 +447,7 @@ class ApplicationController extends Controller
 
         $formattedDate = $this->formatIndonesianDate(now());
 
-        // Get stamp/TTE if template is available
-        $template = \App\Models\Master\DocumentTemplate::where('is_active', true)->where('name', 'like', '%peralatan%')->first();
-        $stampBase64 = null;
-        $signatureBase64 = null;
-        if ($template) {
-            if ($template->stamp_path) {
-                $stampPath = storage_path('app/public/' . $template->stamp_path);
-                if (file_exists($stampPath)) {
-                    $stampBase64 = 'data:image/' . pathinfo($stampPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($stampPath));
-                }
-            }
-            if ($template->signature_path) {
-                $signaturePath = storage_path('app/public/' . $template->signature_path);
-                if (file_exists($signaturePath)) {
-                    $signatureBase64 = 'data:image/' . pathinfo($signaturePath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($signaturePath));
-                }
-            }
-        }
+        [$stampBase64, $signatureBase64] = $this->loadDocumentImages('peralatan');
 
         return response(view('pdf.surat-alat-bg', compact('company', 'application', 'pjbu', 'equipments', 'formattedDate', 'stampBase64', 'signatureBase64'))->render(), 200, [
             'Content-Type' => 'text/html',
@@ -585,24 +469,7 @@ class ApplicationController extends Controller
 
         $formattedDate = $this->formatIndonesianDate(now());
 
-        // Get stamp/TTE if template is available
-        $template = \App\Models\Master\DocumentTemplate::where('is_active', true)->where('name', 'like', '%peralatan%')->first();
-        $stampBase64 = null;
-        $signatureBase64 = null;
-        if ($template) {
-            if ($template->stamp_path) {
-                $stampPath = storage_path('app/public/' . $template->stamp_path);
-                if (file_exists($stampPath)) {
-                    $stampBase64 = 'data:image/' . pathinfo($stampPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($stampPath));
-                }
-            }
-            if ($template->signature_path) {
-                $signaturePath = storage_path('app/public/' . $template->signature_path);
-                if (file_exists($signaturePath)) {
-                    $signatureBase64 = 'data:image/' . pathinfo($signaturePath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($signaturePath));
-                }
-            }
-        }
+        [$stampBase64, $signatureBase64] = $this->loadDocumentImages('peralatan');
 
         $html = view('pdf.surat-alat-bg', compact('company', 'application', 'pjbu', 'equipments', 'formattedDate', 'stampBase64', 'signatureBase64'))->render();
 
@@ -641,23 +508,7 @@ class ApplicationController extends Controller
 
         $formattedDate = $this->formatIndonesianDate(now());
 
-        $template = \App\Models\Master\DocumentTemplate::where('is_active', true)->where('name', 'like', '%peralatan%')->first();
-        $stampBase64 = null;
-        $signatureBase64 = null;
-        if ($template) {
-            if ($template->stamp_path) {
-                $stampPath = storage_path('app/public/' . $template->stamp_path);
-                if (file_exists($stampPath)) {
-                    $stampBase64 = 'data:image/' . pathinfo($stampPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($stampPath));
-                }
-            }
-            if ($template->signature_path) {
-                $signaturePath = storage_path('app/public/' . $template->signature_path);
-                if (file_exists($signaturePath)) {
-                    $signatureBase64 = 'data:image/' . pathinfo($signaturePath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($signaturePath));
-                }
-            }
-        }
+        [$stampBase64, $signatureBase64] = $this->loadDocumentImages('peralatan');
 
         return response(view('pdf.surat-alat-bs', compact('company', 'application', 'pjbu', 'equipments', 'formattedDate', 'stampBase64', 'signatureBase64'))->render(), 200, [
             'Content-Type' => 'text/html',
@@ -679,23 +530,7 @@ class ApplicationController extends Controller
 
         $formattedDate = $this->formatIndonesianDate(now());
 
-        $template = \App\Models\Master\DocumentTemplate::where('is_active', true)->where('name', 'like', '%peralatan%')->first();
-        $stampBase64 = null;
-        $signatureBase64 = null;
-        if ($template) {
-            if ($template->stamp_path) {
-                $stampPath = storage_path('app/public/' . $template->stamp_path);
-                if (file_exists($stampPath)) {
-                    $stampBase64 = 'data:image/' . pathinfo($stampPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($stampPath));
-                }
-            }
-            if ($template->signature_path) {
-                $signaturePath = storage_path('app/public/' . $template->signature_path);
-                if (file_exists($signaturePath)) {
-                    $signatureBase64 = 'data:image/' . pathinfo($signaturePath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($signaturePath));
-                }
-            }
-        }
+        [$stampBase64, $signatureBase64] = $this->loadDocumentImages('peralatan');
 
         $html = view('pdf.surat-alat-bs', compact('company', 'application', 'pjbu', 'equipments', 'formattedDate', 'stampBase64', 'signatureBase64'))->render();
 

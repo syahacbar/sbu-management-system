@@ -1,6 +1,5 @@
 <?php
 
-use App\Http\Controllers\AdminPageController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\DashboardController;
@@ -10,6 +9,7 @@ use App\Http\Controllers\MasterSbuSchemeController;
 use App\Http\Controllers\MasterSbuSubclassificationController;
 use App\Http\Controllers\Master\MasterResourceController;
 use App\Http\Controllers\Master\MasterDocumentTemplateController;
+use App\Http\Controllers\GuideController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\Workspace\CompanyProfileController;
 use App\Http\Controllers\Workspace\ApplicationController;
@@ -39,6 +39,8 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
+
+    Route::get('/panduan', GuideController::class)->name('panduan');
 
     Route::get('/arsip', [CompanyArchiveController::class, 'globalIndex'])->name('archives.global');
     Route::get('/arsip-dokumen/{archive}/view', [CompanyArchiveController::class, 'view'])->name('archives.view');

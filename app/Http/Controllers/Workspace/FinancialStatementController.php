@@ -8,6 +8,7 @@ use App\Models\Master\MasterFinancialItem;
 use App\Models\Workspace\FinancialStatement;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class FinancialStatementController extends Controller
@@ -62,34 +63,36 @@ class FinancialStatementController extends Controller
                 ->with('error', 'Perusahaan ini tidak memiliki pengajuan SBU yang aktif.');
         }
 
-        $request->validate([
+        $validated = $request->validate([
             'year_two' => ['required', 'integer', 'min:2000', 'max:2100'],
             'year_one' => ['required', 'integer', 'min:2000', 'max:2100'],
             'statement_date' => ['required', 'date'],
             'items' => ['required', 'array'],
         ]);
 
-        $statement = $company->balanceEntries()->create([
-            'sbu_application_id' => $activeApplication->id,
-            'year_one' => $request->integer('year_one'),
-            'year_two' => $request->integer('year_two'),
-            'statement_date' => $request->date('statement_date'),
-        ]);
-
-        $inputableItems = MasterFinancialItem::where('is_calculated', false)
-            ->where('is_active', true)
-            ->get();
-
-        foreach ($inputableItems as $item) {
-            $valOne = $request->input("items.{$item->id}.year_one_amount", 0);
-            $valTwo = $request->input("items.{$item->id}.year_two_amount", 0);
-
-            $statement->values()->create([
-                'master_financial_item_id' => $item->id,
-                'year_one_amount' => $this->cleanAmount($valOne),
-                'year_two_amount' => $this->cleanAmount($valTwo),
+        DB::transaction(function () use ($company, $activeApplication, $request): void {
+            $statement = $company->balanceEntries()->create([
+                'sbu_application_id' => $activeApplication->id,
+                'year_one' => $request->integer('year_one'),
+                'year_two' => $request->integer('year_two'),
+                'statement_date' => $request->date('statement_date'),
             ]);
-        }
+
+            $inputableItems = MasterFinancialItem::where('is_calculated', false)
+                ->where('is_active', true)
+                ->get();
+
+            foreach ($inputableItems as $item) {
+                $valOne = $request->input("items.{$item->id}.year_one_amount", 0);
+                $valTwo = $request->input("items.{$item->id}.year_two_amount", 0);
+
+                $statement->values()->create([
+                    'master_financial_item_id' => $item->id,
+                    'year_one_amount' => $this->cleanAmount($valOne),
+                    'year_two_amount' => $this->cleanAmount($valTwo),
+                ]);
+            }
+        });
 
         return redirect()
             ->route('companies.workspace.balance.index', $company)
@@ -136,35 +139,37 @@ class FinancialStatementController extends Controller
             abort(403);
         }
 
-        $request->validate([
+        $validated = $request->validate([
             'year_two' => ['required', 'integer', 'min:2000', 'max:2100'],
             'year_one' => ['required', 'integer', 'min:2000', 'max:2100'],
             'statement_date' => ['required', 'date'],
             'items' => ['required', 'array'],
         ]);
 
-        $statement->update([
-            'year_one' => $request->integer('year_one'),
-            'year_two' => $request->integer('year_two'),
-            'statement_date' => $request->date('statement_date'),
-        ]);
+        DB::transaction(function () use ($request, $statement): void {
+            $statement->update([
+                'year_one' => $request->integer('year_one'),
+                'year_two' => $request->integer('year_two'),
+                'statement_date' => $request->date('statement_date'),
+            ]);
 
-        $inputableItems = MasterFinancialItem::where('is_calculated', false)
-            ->where('is_active', true)
-            ->get();
+            $inputableItems = MasterFinancialItem::where('is_calculated', false)
+                ->where('is_active', true)
+                ->get();
 
-        foreach ($inputableItems as $item) {
-            $valOne = $request->input("items.{$item->id}.year_one_amount", 0);
-            $valTwo = $request->input("items.{$item->id}.year_two_amount", 0);
+            foreach ($inputableItems as $item) {
+                $valOne = $request->input("items.{$item->id}.year_one_amount", 0);
+                $valTwo = $request->input("items.{$item->id}.year_two_amount", 0);
 
-            $statement->values()->updateOrCreate(
-                ['master_financial_item_id' => $item->id],
-                [
-                    'year_one_amount' => $this->cleanAmount($valOne),
-                    'year_two_amount' => $this->cleanAmount($valTwo),
-                ]
-            );
-        }
+                $statement->values()->updateOrCreate(
+                    ['master_financial_item_id' => $item->id],
+                    [
+                        'year_one_amount' => $this->cleanAmount($valOne),
+                        'year_two_amount' => $this->cleanAmount($valTwo),
+                    ]
+                );
+            }
+        });
 
         return redirect()
             ->route('companies.workspace.balance.index', $company)

@@ -1,16 +1,16 @@
 <x-layouts.admin title="{{ $item ? 'Edit Neraca Keuangan' : 'Tambah Neraca Keuangan' }}" :company="$company">
     <div class="space-y-5">
-        <a href="{{ route('companies.workspace.balance.index', $company) }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-slate-950 transition">
+        <a href="{{ route('companies.workspace.balance.index', $company) }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-950 dark:hover:text-white transition">
             <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
             </svg>
             Kembali ke Daftar Neraca
         </a>
 
-        <section class="max-w-5xl rounded-lg border border-slate-200 bg-white shadow-sm">
-            <div class="border-b border-slate-200 p-5">
-                <h3 class="text-lg font-semibold text-slate-950">{{ $item ? 'Edit Neraca Keuangan' : 'Tambah Neraca Keuangan' }}</h3>
-                <p class="mt-1 text-sm text-slate-500">
+        <section class="max-w-5xl rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-sm">
+            <div class="border-b border-slate-200 dark:border-slate-700 p-5">
+                <h3 class="text-lg font-semibold text-slate-950 dark:text-white">{{ $item ? 'Edit Neraca Keuangan' : 'Tambah Neraca Keuangan' }}</h3>
+                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">
                     Masukkan nominal neraca keuangan untuk pembuktian kapasitas modal dan aset bersih.
                 </p>
             </div>
@@ -26,9 +26,9 @@
                 @endif
 
                 <!-- Meta Fields -->
-                <div class="grid gap-5 md:grid-cols-3 border-b border-slate-100 pb-5">
+                <div class="grid gap-5 md:grid-cols-3 border-b border-slate-100 dark:border-slate-700 pb-5">
                     <div>
-                        <label for="year_two" class="block text-sm font-semibold text-slate-700">Tahun Pelaporan (Tahun Terbaru) <span class="text-red-500">*</span></label>
+                        <label for="year_two" class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Tahun Pelaporan (Tahun Terbaru) <span class="text-red-500">*</span></label>
                         <input
                             type="number"
                             name="year_two"
@@ -37,13 +37,13 @@
                             min="2000"
                             max="2100"
                             value="{{ old('year_two', $item?->year_two ?: date('Y') - 1) }}"
-                            class="mt-2 w-full min-h-10 rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 @error('year_two') border-red-500 @enderror"
+                            class="mt-2 w-full min-h-10 rounded-md border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 px-3 py-2 text-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 @error('year_two') border-red-500 @enderror"
                         >
-                        @error('year_two') <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p> @enderror
+                        @error('year_two') <p class="mt-1 text-xs text-red-600 dark:text-red-400 font-medium">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
-                        <label for="year_one" class="block text-sm font-semibold text-slate-700">Tahun Sebelumnya <span class="text-red-500">*</span></label>
+                        <label for="year_one" class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Tahun Sebelumnya <span class="text-red-500">*</span></label>
                         <input
                             type="number"
                             name="year_one"
@@ -52,22 +52,22 @@
                             min="2000"
                             max="2100"
                             value="{{ old('year_one', $item?->year_one ?: date('Y') - 2) }}"
-                            class="mt-2 w-full min-h-10 rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 @error('year_one') border-red-500 @enderror"
+                            class="mt-2 w-full min-h-10 rounded-md border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 px-3 py-2 text-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 @error('year_one') border-red-500 @enderror"
                         >
-                        @error('year_one') <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p> @enderror
+                        @error('year_one') <p class="mt-1 text-xs text-red-600 dark:text-red-400 font-medium">{{ $message }}</p> @enderror
                     </div>
 
                     <div>
-                        <label for="statement_date" class="block text-sm font-semibold text-slate-700">Tanggal Tanda Tangan Neraca <span class="text-red-500">*</span></label>
+                        <label for="statement_date" class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Tanggal Tanda Tangan Neraca <span class="text-red-500">*</span></label>
                         <input
                             type="date"
                             name="statement_date"
                             id="statement_date"
                             required
                             value="{{ old('statement_date', $item?->statement_date?->format('Y-m-d') ?: date('Y-m-d')) }}"
-                            class="mt-2 w-full min-h-10 rounded-md border border-slate-300 px-3 py-2 text-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 @error('statement_date') border-red-500 @enderror"
+                            class="mt-2 w-full min-h-10 rounded-md border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 px-3 py-2 text-sm outline-none transition focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 @error('statement_date') border-red-500 @enderror"
                         >
-                        @error('statement_date') <p class="mt-1 text-xs text-red-600 font-medium">{{ $message }}</p> @enderror
+                        @error('statement_date') <p class="mt-1 text-xs text-red-600 dark:text-red-400 font-medium">{{ $message }}</p> @enderror
                     </div>
                 </div>
 
@@ -82,27 +82,27 @@
 
                     @foreach ($sections as $sectionKey => $sectionTitle)
                         <div class="space-y-3">
-                            <h4 class="text-sm font-bold text-emerald-800 uppercase tracking-wider border-l-4 border-emerald-700 pl-3">
+                            <h4 class="text-sm font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider border-l-4 border-emerald-700 dark:border-emerald-500 pl-3">
                                 {{ $sectionTitle }}
                             </h4>
 
-                            <div class="overflow-x-auto rounded-lg border border-slate-200">
-                                <table class="min-w-full divide-y divide-slate-200 text-sm">
-                                    <thead class="bg-slate-50 text-slate-500 font-semibold uppercase text-xs">
+                            <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700">
+                                <table class="min-w-full divide-y divide-slate-200 dark:divide-slate-700 text-sm">
+                                    <thead class="bg-slate-50 dark:bg-slate-700/50 text-slate-500 dark:text-slate-400 font-semibold uppercase text-xs">
                                         <tr>
                                             <th class="px-5 py-3 text-left">Nama Akun / Uraian</th>
                                             <th class="px-5 py-3 text-left w-1/3">Jumlah Tahun Sebelumnya (<span class="lbl-y1">{{ old('year_one', $item?->year_one ?: date('Y') - 2) }}</span>)</th>
                                             <th class="px-5 py-3 text-left w-1/3">Jumlah Tahun Pelaporan (<span class="lbl-y2">{{ old('year_two', $item?->year_two ?: date('Y') - 1) }}</span>)</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="divide-y divide-slate-200 bg-white">
+                                    <tbody class="divide-y divide-slate-200 dark:divide-slate-700 bg-white dark:bg-slate-800">
                                         @php
                                             $itemsInSection = $masterItems->where('section', $sectionKey);
                                             $groups = $itemsInSection->pluck('group_name')->unique();
                                         @endphp
 
                                         @foreach ($groups as $group)
-                                            <tr class="bg-slate-100/50 font-bold text-slate-600 text-xs tracking-wider">
+                                            <tr class="bg-slate-100/50 dark:bg-slate-700/50 font-bold text-slate-600 dark:text-slate-400 text-xs tracking-wider">
                                                 <td colspan="3" class="px-5 py-2 uppercase">
                                                     Kelompok: {{ str_replace('_', ' ', $group) }}
                                                 </td>
@@ -115,19 +115,19 @@
                                                     $amountTwo = $valRecord ? $valRecord->year_two_amount : 0;
                                                 @endphp
 
-                                                <tr class="{{ $masterItem->is_calculated ? 'bg-emerald-50/40 font-bold text-emerald-900' : '' }}">
+                                                <tr class="{{ $masterItem->is_calculated ? 'bg-emerald-50/40 dark:bg-emerald-900/20 font-bold text-emerald-900 dark:text-emerald-300' : '' }}">
                                                     <td class="px-5 py-3">
-                                                        <p class="{{ $masterItem->is_calculated ? 'font-bold' : 'text-slate-800 font-medium' }}">
+                                                        <p class="{{ $masterItem->is_calculated ? 'font-bold' : 'text-slate-800 dark:text-slate-200 font-medium' }}">
                                                             {{ $masterItem->name }}
                                                         </p>
                                                         @if ($masterItem->description)
-                                                            <p class="text-[10px] text-slate-400 mt-0.5 leading-relaxed">{{ $masterItem->description }}</p>
+                                                            <p class="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5 leading-relaxed">{{ $masterItem->description }}</p>
                                                         @endif
                                                     </td>
                                                     <td class="px-5 py-3">
                                                         @if ($masterItem->is_calculated)
                                                             <!-- Calculated Field (Output only) -->
-                                                            <span class="calc-label font-mono font-bold text-emerald-800 text-sm" 
+                                                            <span class="calc-label font-mono font-bold text-emerald-800 dark:text-emerald-400 text-sm" 
                                                                   id="calc-y1-{{ $masterItem->code }}" 
                                                                   data-code="{{ $masterItem->code }}">
                                                                 Rp {{ number_format($amountOne, 0, ',', '.') }}
@@ -135,14 +135,14 @@
                                                         @else
                                                             <!-- Input Field -->
                                                             <div class="flex items-center gap-1.5">
-                                                                <span class="text-slate-400 font-semibold text-xs">Rp</span>
+                                                                <span class="text-slate-400 dark:text-slate-500 font-semibold text-xs">Rp</span>
                                                                 <input
                                                                     type="text"
                                                                     name="items[{{ $masterItem->id }}][year_one_amount]"
                                                                     value="{{ old('items.'.$masterItem->id.'.year_one_amount', $amountOne) }}"
                                                                     data-group="{{ $masterItem->group_name }}"
                                                                     data-code="{{ $masterItem->code }}"
-                                                                    class="input-y1 min-h-9 w-full rounded border border-slate-300 px-2 py-1 text-sm outline-none transition focus:border-emerald-600 focus:ring-1 focus:ring-emerald-100 font-mono text-right"
+                                                                    class="input-y1 min-h-9 w-full rounded border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 px-2 py-1 text-sm outline-none transition focus:border-emerald-600 focus:ring-1 focus:ring-emerald-100 font-mono text-right"
                                                                 >
                                                             </div>
                                                         @endif
@@ -150,7 +150,7 @@
                                                     <td class="px-5 py-3">
                                                         @if ($masterItem->is_calculated)
                                                             <!-- Calculated Field (Output only) -->
-                                                            <span class="calc-label font-mono font-bold text-emerald-800 text-sm" 
+                                                            <span class="calc-label font-mono font-bold text-emerald-800 dark:text-emerald-400 text-sm" 
                                                                   id="calc-y2-{{ $masterItem->code }}" 
                                                                   data-code="{{ $masterItem->code }}">
                                                                 Rp {{ number_format($amountTwo, 0, ',', '.') }}
@@ -158,14 +158,14 @@
                                                         @else
                                                             <!-- Input Field -->
                                                             <div class="flex items-center gap-1.5">
-                                                                <span class="text-slate-400 font-semibold text-xs">Rp</span>
+                                                                <span class="text-slate-400 dark:text-slate-500 font-semibold text-xs">Rp</span>
                                                                 <input
                                                                     type="text"
                                                                     name="items[{{ $masterItem->id }}][year_two_amount]"
                                                                     value="{{ old('items.'.$masterItem->id.'.year_two_amount', $amountTwo) }}"
                                                                     data-group="{{ $masterItem->group_name }}"
                                                                     data-code="{{ $masterItem->code }}"
-                                                                    class="input-y2 min-h-9 w-full rounded border border-slate-300 px-2 py-1 text-sm outline-none transition focus:border-emerald-600 focus:ring-1 focus:ring-emerald-100 font-mono text-right"
+                                                                    class="input-y2 min-h-9 w-full rounded border border-slate-300 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100 px-2 py-1 text-sm outline-none transition focus:border-emerald-600 focus:ring-1 focus:ring-emerald-100 font-mono text-right"
                                                                 >
                                                             </div>
                                                         @endif
@@ -181,25 +181,25 @@
                 </div>
 
                 <!-- Summary Row (Kekayaan Bersih / Modal) -->
-                <div class="rounded-lg border border-emerald-200 bg-emerald-50/50 p-5 space-y-3">
-                    <h4 class="text-xs font-bold text-emerald-800 uppercase tracking-wider">Hasil Ringkasan Perhitungan Kekayaan Bersih</h4>
-                    <div class="grid gap-5 md:grid-cols-2 font-bold text-slate-800">
-                        <div class="flex items-center justify-between bg-white border border-emerald-100 rounded-md p-4 shadow-sm">
-                            <span class="text-sm font-semibold text-slate-600">Kekayaan Bersih (<span class="lbl-y1">Tahun 1</span>)</span>
-                            <span class="font-mono text-lg text-emerald-800" id="summary-net-y1">Rp 0</span>
+                <div class="rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-900/20 p-5 space-y-3">
+                    <h4 class="text-xs font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-wider">Hasil Ringkasan Perhitungan Kekayaan Bersih</h4>
+                    <div class="grid gap-5 md:grid-cols-2 font-bold text-slate-800 dark:text-slate-200">
+                        <div class="flex items-center justify-between bg-white dark:bg-slate-800 border border-emerald-100 dark:border-emerald-800 rounded-md p-4 shadow-sm">
+                            <span class="text-sm font-semibold text-slate-600 dark:text-slate-400">Kekayaan Bersih (<span class="lbl-y1">Tahun 1</span>)</span>
+                            <span class="font-mono text-lg text-emerald-800 dark:text-emerald-400" id="summary-net-y1">Rp 0</span>
                         </div>
-                        <div class="flex items-center justify-between bg-white border border-emerald-100 rounded-md p-4 shadow-sm">
-                            <span class="text-sm font-semibold text-slate-600">Kekayaan Bersih (<span class="lbl-y2">Tahun 2</span>)</span>
-                            <span class="font-mono text-lg text-emerald-800" id="summary-net-y2">Rp 0</span>
+                        <div class="flex items-center justify-between bg-white dark:bg-slate-800 border border-emerald-100 dark:border-emerald-800 rounded-md p-4 shadow-sm">
+                            <span class="text-sm font-semibold text-slate-600 dark:text-slate-400">Kekayaan Bersih (<span class="lbl-y2">Tahun 2</span>)</span>
+                            <span class="font-mono text-lg text-emerald-800 dark:text-emerald-400" id="summary-net-y2">Rp 0</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="flex items-center justify-end gap-3 border-t border-slate-200 pt-5">
-                    <a href="{{ route('companies.workspace.balance.index', $company) }}" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 font-medium">
+                <div class="flex items-center justify-end gap-3 border-t border-slate-200 dark:border-slate-700 pt-5">
+                    <a href="{{ route('companies.workspace.balance.index', $company) }}" class="rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 transition hover:bg-slate-100 dark:hover:bg-slate-600 font-medium">
                         Batal
                     </a>
-                    <button type="submit" class="rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-800 font-medium">
+                    <button type="submit" class="rounded-md bg-emerald-700 dark:bg-emerald-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-emerald-800 dark:hover:bg-emerald-700 font-medium">
                         Simpan Neraca
                     </button>
                 </div>
