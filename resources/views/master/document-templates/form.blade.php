@@ -225,7 +225,16 @@
                                     '{company_name}' => 'Nama Perusahaan',
                                     '{company_address}' => 'Alamat Perusahaan',
                                     '{company_npwp}' => 'NPWP Perusahaan',
+                                    '{company_phone}' => 'Telepon Perusahaan',
+                                    '{company_email}' => 'Email Perusahaan',
+                                    '{signing_place}' => 'Tempat Tanda Tangan',
                                     '{director_name}' => 'Nama Direktur Utama',
+                                ],
+                                'PJBU' => [
+                                    '{pjbu_name}' => 'Nama PJBU',
+                                    '{pjbu_nik}' => 'NIK PJBU',
+                                    '{pjbu_npwp}' => 'NPWP PJBU',
+                                    '{pjbu_position}' => 'Jabatan PJBU',
                                 ],
                                 'Domain SBU' => [
                                     '{kbli_code}' => 'Kode KBLI SBU',

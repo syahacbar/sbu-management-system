@@ -17,12 +17,20 @@ class PdfDocumentService
         $company = $application->company;
         $mainDirector = $company->directors()->where('is_main', true)->first() ?: $company->directors()->first();
         $directorName = $mainDirector?->name ?? '-';
+        $pjbu = $company->pjbus()->where('is_main', true)->first() ?: $company->pjbus()->first();
 
         $tokens = [
             'company_name' => $company->name,
             'company_address' => $company->address ?? '-',
             'company_npwp' => $company->npwp ?? '-',
+            'company_phone' => $company->phone ?? '-',
+            'company_email' => $company->email ?? '-',
+            'signing_place' => $company->signing_place ?: 'Jayapura',
             'director_name' => $directorName,
+            'pjbu_name' => $pjbu?->name ?? $directorName,
+            'pjbu_nik' => $pjbu?->nik ?? '-',
+            'pjbu_npwp' => $pjbu?->npwp ?? '-',
+            'pjbu_position' => $pjbu?->position ?: 'Penanggung Jawab Badan Usaha',
             'kbli_code' => $application->kbli?->code ?? '-',
             'kbli_name' => $application->kbli?->name ?? '-',
             'classification_code' => $application->classification?->code ?? '-',

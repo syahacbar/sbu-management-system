@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
             ['email' => 'admin@sbu.local'],
             [
                 'name' => 'Admin SBU',
-                'password' => Hash::make('password'),
+                'password' => Hash::make('sayaganteng'),
             ],
         );
 

@@ -267,6 +267,12 @@ class ApplicationController extends Controller
         $formattedDate = $this->formatIndonesianDate(now());
 
         [$stampBase64, $signatureBase64] = $this->loadDocumentImages('SPTJM');
+        $template = \App\Models\Master\DocumentTemplate::where('is_active', true)
+            ->where(function ($query): void {
+                $query->where('code', 'SPTJM')
+                    ->orWhere('name', 'like', '%SPTJM%');
+            })
+            ->first();
 
         $html = view('pdf.sptjm', compact('company', 'application', 'pjbu', 'formattedDate', 'stampBase64', 'signatureBase64'))->render();
 
